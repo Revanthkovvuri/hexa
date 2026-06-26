@@ -1,0 +1,573 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* FORCE BLACK - Panther needs a dark background for mix-blend-mode: screen */
+html {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
+body {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
+/* Ensure the Next.js root div is also black */
+#__next,
+[data-nextjs-root] {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+/* === Base Reset === */
+html,
+body {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  color: #ffffff;
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+/* === Custom Silk Background === */
+.silk-bg {
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(30, 30, 40, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(40, 40, 60, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(20, 20, 35, 0.5) 0%, transparent 50%),
+    #000000;
+}
+
+/* Glass card style */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+}
+
+/* Panther overlay - always on top */
+#panther-overlay {
+  z-index: 9999 !important;
+  position: fixed;
+  pointer-events: none;
+}
+
+::selection {
+  background: #FFC600;
+  color: #000000;
+}
+
+/* === Material Icons === */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* === Glassmorphism Panel === */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* === Accent Glow === */
+.accent-glow {
+  filter: drop-shadow(0 0 15px rgba(255, 198, 0, 0.3));
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FFC600;
+}
+
+/* === Animations === */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+/* === Subtle Background Animation === */
+.bg-subtle-drift {
+  animation: bgDrift 20s ease-in-out infinite;
+}
+
+@keyframes bgDrift {
+  0%, 100% { background-position: 0% 0%; }
+  25% { background-position: 2% 1%; }
+  50% { background-position: 0% 2%; }
+  75% { background-position: -1% 1%; }
+}
+
+/* Roadmap styles - updated for dark theme */
+.roadmap-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: transparent;
+  padding: 60px 0 40px;
+}
+
+/* ... (keep rest of your roadmap styles but update colors from #0D1A3A to #000000 or dark shades) ... */
+
+/* Header */
+.roadmap-header {
+  text-align: center;
+  padding: 0 24px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.roadmap-header-tag {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #FFC600;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.roadmap-header-title {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: clamp(28px, 5vw, 56px);
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0 0 12px;
+}
+
+.roadmap-header-subtitle {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 14px;
+  color: #8FA8C8;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Canvas container */
+.roadmap-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  min-height: 450px;
+  max-height: 700px;
+}
+
+@media (min-width: 768px) {
+  .roadmap-canvas-container {
+    height: 65vh;
+  }
+}
+
+/* Checkpoint labels */
+.roadmap-checkpoint-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.roadmap-phase-tag {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+  text-shadow: 0 2px 4px rgba(13, 26, 58, 0.8);
+}
+
+.roadmap-phase-name {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 6px rgba(13, 26, 58, 0.9);
+}
+
+/* Checkered flag */
+.roadmap-flag-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.roadmap-checkered-flag {
+  display: grid;
+  grid-template-columns: repeat(4, 10px);
+  grid-template-rows: repeat(4, 10px);
+  gap: 0;
+  border: 1px solid #C8D4E4;
+  box-shadow: 0 0 12px rgba(255, 198, 0, 0.2);
+}
+
+.roadmap-flag-square {
+  width: 10px;
+  height: 10px;
+}
+
+.roadmap-flag-label {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: #FFC600;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+/* Tooltip */
+.roadmap-tooltip {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 280px;
+  padding: 20px;
+  background: rgba(13, 26, 58, 0.88);
+  /* ✅ FIX: backdrop-filter kept here — tooltip is a small specific element,
+     not a section wrapper, so stacking context is contained and harmless. */
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 198, 0, 0.15);
+  border-radius: 8px;
+  z-index: 20;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.roadmap-tooltip-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.roadmap-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.roadmap-tooltip-phase {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #FFC600;
+}
+
+.roadmap-tooltip-status {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.roadmap-tooltip-title {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.roadmap-tooltip-desc {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 12px;
+  color: #8FA8C8;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.roadmap-tooltip-bar {
+  width: 100%;
+  height: 3px;
+  background: #1E3A6E;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.roadmap-tooltip-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(255, 198, 0, 0.4);
+  background: #FFC600;
+}
+
+/* Progress HUD */
+.roadmap-hud {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  z-index: 15;
+  padding: 16px 20px;
+  background: rgba(13, 26, 58, 0.75);
+  /* ✅ FIX: backdrop-filter kept here — HUD is a small specific element,
+     not a section wrapper, so stacking context is contained and harmless. */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 198, 0, 0.1);
+  border-radius: 8px;
+}
+
+.roadmap-hud-progress {
+  width: 120px;
+}
+
+.roadmap-hud-progress-track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background: #1E3A6E;
+  border-radius: 2px;
+  overflow: visible;
+}
+
+.roadmap-hud-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #FFC600;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 6px rgba(255, 198, 0, 0.5);
+}
+
+.roadmap-hud-segment {
+  position: absolute;
+  top: -3px;
+  width: 5px;
+  height: 9px;
+  background: #0D1A3A;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+.roadmap-hud-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.roadmap-hud-label {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: #8FA8C8;
+  text-transform: uppercase;
+}
+
+.roadmap-hud-value {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.roadmap-hud-percent {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.roadmap-hud-number {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: #FFC600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.roadmap-hud-unit {
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 14px;
+  color: #FFC600;
+  opacity: 0.6;
+}
+
+/* Legend pills */
+.roadmap-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 15;
+}
+
+@media (max-width: 768px) {
+  .roadmap-legend {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .roadmap-hud {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    justify-content: center;
+    margin: 0 16px;
+    flex-wrap: wrap;
+  }
+
+  .roadmap-tooltip {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+}
+
+.roadmap-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(13, 26, 58, 0.6);
+  border: 1px solid rgba(13, 26, 58, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.roadmap-legend-item:hover {
+  border-color: rgba(255, 198, 0, 0.3);
+  background: rgba(255, 198, 0, 0.05);
+}
+
+.roadmap-legend-active {
+  border-color: rgba(255, 198, 0, 0.5) !important;
+  background: rgba(255, 198, 0, 0.08) !important;
+}
+
+.roadmap-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.roadmap-legend-completed .roadmap-legend-dot {
+  background: #FFC600;
+  box-shadow: 0 0 6px rgba(255, 198, 0, 0.6);
+}
+
+.roadmap-legend-current .roadmap-legend-dot {
+  background: #FFC600;
+  box-shadow: 0 0 6px rgba(255, 198, 0, 0.6);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.roadmap-legend-locked .roadmap-legend-dot {
+  background: #C8D4E4;
+}
+
+.roadmap-legend-phase {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #8FA8C8;
+}
+
+.roadmap-legend-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #E2E8F0;
+}
+
+.roadmap-legend-locked .roadmap-legend-name {
+  color: #8FA8C8;
+}
+
+/* Loader */
+.roadmap-loader {
+  width: 100%;
+  height: 60vh;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #8FA8C8;
+  font-family: var(--font-space-grotesk), monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+}
+
+.roadmap-loader-ring {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #C8D4E4;
+  border-top-color: #FFC600;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* === Cinematic Framer Motion Additions === */
+
+.roadmap-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(13, 26, 58, 0.02) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.text-accent-400 {
+  color: #FFC600;
+  text-shadow: 0 0 15px rgba(255, 198, 0, 0.4);
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
