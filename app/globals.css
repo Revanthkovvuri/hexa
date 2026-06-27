@@ -2,28 +2,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* FORCE BLACK - Panther needs a dark background for mix-blend-mode: screen */
-html {
-  background: #000000 !important;
-  background-color: #000000 !important;
-}
 
-body {
-  background: #000000 !important;
-  background-color: #000000 !important;
-}
-
-/* Ensure the Next.js root div is also black */
+/* === Base Reset & Dark Mode Enforcement === */
+html,
+body,
 #__next,
 [data-nextjs-root] {
   background: #000000 !important;
-  background-color: #000000 !important;
-}
-/* === Base Reset === */
-html,
-body {
-  background: #000000 !important;
-  background-color: #000000 !important;
   color: #ffffff;
   font-family: var(--font-inter), sans-serif;
   overflow-x: hidden;
@@ -31,6 +16,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
 /* === Custom Silk Background === */
 .silk-bg {
   background: 
@@ -47,13 +33,6 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
-}
-
-/* Panther overlay - always on top */
-#panther-overlay {
-  z-index: 9999 !important;
-  position: fixed;
-  pointer-events: none;
 }
 
 ::selection {
@@ -127,8 +106,6 @@ body {
   background: transparent;
   padding: 60px 0 40px;
 }
-
-/* ... (keep rest of your roadmap styles but update colors from #0D1A3A to #000000 or dark shades) ... */
 
 /* Header */
 .roadmap-header {
@@ -250,8 +227,6 @@ body {
   width: 280px;
   padding: 20px;
   background: rgba(13, 26, 58, 0.88);
-  /* ✅ FIX: backdrop-filter kept here — tooltip is a small specific element,
-     not a section wrapper, so stacking context is contained and harmless. */
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 198, 0, 0.15);
   border-radius: 8px;
@@ -331,8 +306,6 @@ body {
   z-index: 15;
   padding: 16px 20px;
   background: rgba(13, 26, 58, 0.75);
-  /* ✅ FIX: backdrop-filter kept here — HUD is a small specific element,
-     not a section wrapper, so stacking context is contained and harmless. */
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 198, 0, 0.1);
   border-radius: 8px;
@@ -562,12 +535,13 @@ body {
   text-shadow: 0 0 15px rgba(255, 198, 0, 0.4);
 }
 
-/* Animations */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.4); }
+@keyframes dotFloat {
+  0%, 100% {
+    opacity: var(--opacity-min);
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: var(--opacity-max);
+    transform: translate(var(--drift-x), var(--drift-y)) scale(1.4);
+  }
 }

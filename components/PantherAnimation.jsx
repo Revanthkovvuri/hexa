@@ -1,77 +1,111 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import Image from 'next/image';
 
-const TOTAL_FRAMES = 19;
+// ─── Config ───────────────────────────────────────────────────────────────────
+const TOTAL_FRAMES = 30;
 
 const FRAME_NAMES = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
-  `/images/ezgif-split/frame_${String(i*2).padStart(2, '0')}_delay-0.1s.gif`
+  `/images/ezgif-split/frame_${String(i).padStart(2, '0')}_delay-0.1s.gif`
 );
 
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function PantherAnimation({
-  size = 480,
+  size = 150,
   opacity = 0.75,
   glowColor = '#00DCC8',
 }) {
-  const [frame, setFrame] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const rafRef = useRef(null);
-  const scrollTimeoutRef = useRef(null);
+  const containerRef   = useRef(null);
+  const currentFrame   = useRef(0);
+  const rafRef         = useRef(null);
+  const scrollTimeout  = useRef(null);
+  const isScrolling    = useRef(false);
 
-  const handleScroll = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      const scrolled = window.scrollY;
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const progress = maxScroll > 0 ? scrolled / maxScroll : 0;
-      const nextFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
-      setFrame(nextFrame);
-      setIsScrolling(true);
-      clearTimeout(scrollTimeoutRef.current);
-      scrollTimeoutRef.current = setTimeout(() => setIsScrolling(false), 150);
+  // ── Decode all frames into GPU memory on mount ──────────────────────────────
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const imgs = containerRef.current.querySelectorAll('img');
+    imgs.forEach((img) => {
+      if (img.complete) {
+        img.decode().catch(() => {});
+      } else {
+        img.addEventListener('load', () => img.decode().catch(() => {}), { once: true });
+      }
     });
   }, []);
 
+  // ── Direct DOM frame switch — zero React re-renders ─────────────────────────
+  const showFrame = useCallback((nextFrame) => {
+    if (!containerRef.current) return;
+    if (nextFrame === currentFrame.current) return;
+
+    const imgs = containerRef.current.querySelectorAll('img');
+    imgs[currentFrame.current].style.opacity = '0';
+    imgs[nextFrame].style.opacity = '1';
+
+    currentFrame.current = nextFrame;
+  }, []);
+
+  // ── Glow pulse ──────────────────────────────────────────────────────────────
+  const [glowActive, setGlowActive] = useState(false);
+
+  const triggerGlow = useCallback((active) => {
+    if (isScrolling.current === active) return;
+    isScrolling.current = active;
+    setGlowActive(active);
+  }, []);
+
+  // ── Scroll handler ──────────────────────────────────────────────────────────
+  const handleScroll = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+    rafRef.current = requestAnimationFrame(() => {
+      const scrolled  = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const progress  = maxScroll > 0 ? scrolled / maxScroll : 0;
+      const nextFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
+
+      showFrame(nextFrame);
+      triggerGlow(true);
+
+      clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => triggerGlow(false), 150);
+    });
+  }, [showFrame, triggerGlow]);
+
+  // ── Event listener lifecycle ────────────────────────────────────────────────
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     window.addEventListener('scroll', handleScroll, { passive: true });
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      clearTimeout(scrollTimeoutRef.current);
+      if (rafRef.current)        cancelAnimationFrame(rafRef.current);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
     };
   }, [handleScroll]);
 
-  // Preload all frames on mount
-  useEffect(() => {
-    FRAME_NAMES.forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
-  }, []);
+  // ── Derived glow values ─────────────────────────────────────────────────────
+  const glowSize  = glowActive ? '32px' : '18px';
+  const glowAlpha = glowActive ? '60'   : '30';
 
-  const glowSize = isScrolling ? '32px' : '18px';
-  const glowAlpha = isScrolling ? '60' : '30';
-
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div
+      id="panther-overlay"
       aria-hidden="true"
       style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        // ✅ transform is on its own layer — no opacity here to create stacking context
-        transform: 'translate(-50%, -50%)',
-        // ✅ high enough to float above page content, below modals/drawers
-        zIndex: 0,
+        position:      'fixed',
+        zIndex:        0, // ✅ FIX: Pushes the panther into the background
+        top:           '60%',
+        left:          '50%',
+        transform:     'translate(-50%, -50%)',
         pointerEvents: 'none',
-        userSelect: 'none',
-        width: size,
-        height: 'auto',
-        // ✅ opacity moved into filter chain — filter: opacity() does NOT
-        // create a new stacking context, unlike the opacity CSS property.
-        // This means z-index works correctly and nothing gets buried.
+        userSelect:    'none',
+        overflow:      'hidden',
+        width:         `${size}px`,
+        height:        `${size}px`,
         filter: [
           `opacity(${opacity})`,
           `drop-shadow(0 0 ${glowSize} ${glowColor}${glowAlpha})`,
@@ -80,24 +114,32 @@ export default function PantherAnimation({
         transition: 'filter 0.25s ease',
       }}
     >
-      <Image
-        src={FRAME_NAMES[frame]}
-        alt=""
-        width={size}
-        height={size}
-        style={{
-          width: '100%',
-          height: 'auto',
-          objectFit: 'contain',
-          // ✅ mixBlendMode scoped to the image only, not the wrapper.
-          // Applying it on the wrapper would create yet another stacking context.
-          mixBlendMode: 'screen',
-          // ✅ display block removes the inline gap below the image
-          display: 'block',
-        }}
-        priority={frame === 0}
-        unoptimized
-      />
+      <div
+        ref={containerRef}
+        style={{ position: 'relative', width: '100%', height: '100%' }}
+      >
+        {FRAME_NAMES.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            width={size}
+            height={size}
+            style={{
+              position:    'absolute',
+              top:         0,
+              left:        0,
+              width:       '100%',
+              height:      '100%',
+              objectFit:   'contain',
+              display:     'block',
+              mixBlendMode:'screen',
+              opacity:      i === 0 ? 1 : 0,
+              willChange:  'opacity',
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }

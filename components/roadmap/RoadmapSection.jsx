@@ -63,21 +63,35 @@ export default function RoadmapSection() {
         </p>
       </motion.div>
 
-      <div className="roadmap-canvas-container">
-        {/* Track Canvas */}
+      <div className="roadmap-canvas-container relative">
+        {/* Glass frame — padded so it's actually visible around the opaque 3D canvas, not hidden behind it */}
+        <div
+          className="absolute inset-0 rounded-3xl pointer-events-none"
+          style={{
+            background: 'rgba(13, 26, 58, 0.25)',
+            backdropFilter: 'blur(22px)',
+            WebkitBackdropFilter: 'blur(22px)',
+            border: '1px solid rgba(255, 198, 0, 0.12)',
+            boxShadow: 'inset 0 0 80px rgba(0,0,0,0.25), 0 8px 40px rgba(0,0,0,0.35)',
+          }}
+        />
+
+        {/* Track Canvas — inset so the glass frame shows around its edges */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4, duration: 1 }}
-          className="w-full h-full"
+          className="w-full h-full relative z-10 p-3 md:p-5"
         >
-          <TrackCanvas
-            progress={progress}
-            hoveredCheckpoint={hoveredCheckpoint}
-            onHoverCheckpoint={setHoveredCheckpoint}
-            onLeaveCheckpoint={() => setHoveredCheckpoint(null)}
-            onClickCheckpoint={handleClickCheckpoint}
-          />
+          <div className="w-full h-full rounded-2xl overflow-hidden">
+            <TrackCanvas
+              progress={progress}
+              hoveredCheckpoint={hoveredCheckpoint}
+              onHoverCheckpoint={setHoveredCheckpoint}
+              onLeaveCheckpoint={() => setHoveredCheckpoint(null)}
+              onClickCheckpoint={handleClickCheckpoint}
+            />
+          </div>
         </motion.div>
 
         {/* Dynamic Tooltip */}

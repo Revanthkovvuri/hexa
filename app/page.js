@@ -33,9 +33,9 @@ export default function Home() {
         <Hero />
         <ScrollReveal><Crowdfunding /></ScrollReveal>
         <ScrollReveal><CarSpecs2D /></ScrollReveal>
-        <ScrollReveal><Team /></ScrollReveal>
         <ScrollReveal><Performance /></ScrollReveal>
         <ScrollReveal><Roadmap /></ScrollReveal>
+        <ScrollReveal><Team /></ScrollReveal>
         <Footer />
       </div>
     </>
