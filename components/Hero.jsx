@@ -74,23 +74,19 @@ export default function Hero() {
 
   // Auto-play effect - runs once and manages its own interval
   useEffect(() => {
-    // Don't start if no slides or still loading
     if (slides.length <= 1) return;
 
-    // Clear any existing interval first
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
-    // Start fresh interval
     intervalRef.current = setInterval(() => {
       if (!isHovered) {
         setCurrentSlide((prev) => (prev + 1) % slides.length);
       }
     }, AUTO_PLAY_INTERVAL);
 
-    // Cleanup on unmount or when slides/hover changes
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -109,7 +105,6 @@ export default function Hero() {
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
-    // Reset interval when manually clicking
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
@@ -292,7 +287,7 @@ export default function Hero() {
 
           {/* CENTER CARD */}
           <motion.div
-            className="absolute w-[48%] h-[76%]"
+            className="absolute w-[50%] h-[78%]"
             style={{
               zIndex: 30,
               transform: 'translateZ(0px)',
@@ -310,8 +305,8 @@ export default function Hero() {
               >
                 {activeSlideData.image_url && (
                   <motion.div
-                    initial={{ scale: 1.05 }}
-                    animate={{ scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="relative w-full h-full"
                   >
@@ -319,14 +314,15 @@ export default function Hero() {
                       src={activeSlideData.image_url}
                       alt={activeSlideData.headline || ""}
                       fill
-                      className="object-cover"
+                      className="object-cover object-center scale-110"
                       priority
                       quality={100}
+                      sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   </motion.div>
                 )}
                 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none" />
                 
                 <div className="absolute inset-0 flex items-end p-10 md:p-12 lg:p-14">
                   <motion.div

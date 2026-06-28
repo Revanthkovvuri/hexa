@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import ContributionModal from "./ContributionModal";
 import { createClient } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,13 +17,14 @@ export default function Crowdfunding() {
     targetGoal: 3000000,
     raised: 0,
     supporters: 0,
+    campaignId: null,
   });
   const [prevRaised, setPrevRaised] = useState(null);
   const [isLiveUpdating, setIsLiveUpdating] = useState(false);
   const [recentDonors, setRecentDonors] = useState([]);
+  const [showContributionModal, setShowContributionModal] = useState(false);
   const channelRef = useRef(null);
 
-  // ─── INITIAL FETCH ───────────────────────────────────────────────────────
   useEffect(() => {
     async function fetchCrowdfundingData() {
       const { data: campaign } = await supabase
@@ -52,6 +54,7 @@ export default function Crowdfunding() {
           targetGoal: Math.round(campaign.goal_amount_paise / 100),
           raised: Math.round(campaign.total_raised_paise / 100),
           supporters: supportersCount,
+          campaignId: campaign.id,
         });
       }
 
@@ -75,7 +78,6 @@ export default function Crowdfunding() {
     fetchCrowdfundingData();
   }, []);
 
-  // ─── REAL-TIME SUBSCRIPTION ──────────────────────────────────────────────
   useEffect(() => {
     const campaignChannel = supabase
       .channel("campaign-live-updates")
@@ -102,11 +104,12 @@ export default function Crowdfunding() {
             supportersCount = uniqueEmails.size;
           }
 
-          setStats({
+          setStats(prev => ({
+            ...prev,
             targetGoal: Math.round(newData.goal_amount_paise / 100),
             raised: Math.round(newData.total_raised_paise / 100),
             supporters: supportersCount,
-          });
+          }));
 
           setIsLiveUpdating(true);
           setTimeout(() => setIsLiveUpdating(false), 2000);
@@ -163,7 +166,6 @@ export default function Crowdfunding() {
     };
   }, [stats.raised]);
 
-  // ─── CALCULATIONS ────────────────────────────────────────────────────────
   const percentageRaw = stats.targetGoal > 0 ? (stats.raised / stats.targetGoal) * 100 : 0;
   const PERCENTAGE = Math.min(100, Math.max(0, Math.round(percentageRaw)));
   const ACTIVE_SEGMENTS = Math.round((PERCENTAGE / 100) * TOTAL_SEGMENTS);
@@ -188,11 +190,9 @@ export default function Crowdfunding() {
 
   return (
     <section className="py-20 md:py-28 px-6 md:px-8 max-w-[1440px] mx-auto relative z-10" id="crowdfund">
-      {/* Background orbs */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00C8E0]/5 blur-[150px] rounded-full pointer-events-none" />
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#FFC600]/3 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Live indicator */}
       <AnimatePresence>
         {isLiveUpdating && (
           <motion.div
@@ -208,8 +208,6 @@ export default function Crowdfunding() {
       </AnimatePresence>
 
       <div className="relative max-w-5xl mx-auto">
-        
-        {/* Floating label */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -224,7 +222,6 @@ export default function Crowdfunding() {
           <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-[#00C8E0]/50" />
         </motion.div>
 
-        {/* Headline */}
         <motion.h2 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -238,18 +235,16 @@ export default function Crowdfunding() {
           </span>
         </motion.h2>
 
-        {/* Description */}
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="text-sm md:text-base text-white/40 text-center max-w-2xl mx-auto leading-relaxed mb-12"
+          className="text-sm md:text-base text-white/60 text-center max-w-2xl mx-auto leading-relaxed mb-12"
         >
           Our journey to the podium isn&apos;t just about engineering—it&apos;s about the community that fuels our ambition.
         </motion.p>
 
-        {/* Stats Cards */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -273,9 +268,7 @@ export default function Crowdfunding() {
                 />
               )}
             </AnimatePresence>
-            
             <p className="text-[10px] md:text-xs text-[#FFC600]/60 uppercase tracking-[0.2em] font-bold mb-3 relative z-10">Raised</p>
-            
             <AnimatePresence mode="wait">
               <motion.p
                 key={stats.raised}
@@ -286,19 +279,6 @@ export default function Crowdfunding() {
               >
                 {formatCurrency(stats.raised)}
               </motion.p>
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {isLiveUpdating && justAdded > 0 && (
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="text-[10px] text-[#00C8E0] font-bold mt-1 relative z-10"
-                >
-                  +{formatCurrency(justAdded)} just now!
-                </motion.p>
-              )}
             </AnimatePresence>
           </div>
 
@@ -318,7 +298,6 @@ export default function Crowdfunding() {
           </div>
         </motion.div>
 
-        {/* ✅ PROGRESS BAR SECTION */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -331,15 +310,7 @@ export default function Crowdfunding() {
               <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-bold mb-2">Progress</p>
               <div className="flex items-baseline gap-1">
                 <AnimatePresence mode="wait">
-                  <motion.span
-                    key={PERCENTAGE}
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="text-4xl md:text-5xl font-black text-white"
-                  >
-                    {PERCENTAGE}
-                  </motion.span>
+                  <motion.span key={PERCENTAGE} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 400, damping: 25 }} className="text-4xl md:text-5xl font-black text-white">{PERCENTAGE}</motion.span>
                 </AnimatePresence>
                 <span className="text-xl text-white/40">%</span>
               </div>
@@ -350,48 +321,25 @@ export default function Crowdfunding() {
             </div>
           </div>
 
-          {/* Segmented Progress Bar */}
           <div className="flex gap-1 mb-4">
             {Array.from({ length: TOTAL_SEGMENTS }, (_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scaleY: 0 }}
-                whileInView={{ opacity: 1, scaleY: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 + i * 0.02, duration: 0.3 }}
-                className={`h-8 md:h-10 flex-1 rounded-sm transition-all duration-500 ${
-                  i < ACTIVE_SEGMENTS 
-                    ? "bg-gradient-to-b from-[#00C8E0] to-[#00C8E0]/60 shadow-[0_0_10px_rgba(0,200,224,0.4)]" 
-                    : "bg-white/[0.04] hover:bg-white/[0.06]"
-                }`}
-              />
+              <motion.div key={i} className={`h-8 md:h-10 flex-1 rounded-sm transition-all duration-500 ${i < ACTIVE_SEGMENTS ? "bg-gradient-to-b from-[#00C8E0] to-[#00C8E0]/60 shadow-[0_0_10px_rgba(0,200,224,0.4)]" : "bg-white/[0.04]"}`} />
             ))}
           </div>
 
           <div className="flex justify-between text-[10px] text-white/20 font-mono uppercase tracking-wider">
-            <span>0%</span>
-            <span>50%</span>
-            <span>100%</span>
+            <span>0%</span><span>50%</span><span>100%</span>
           </div>
         </motion.div>
 
-        {/* ✅ RECENT DONORS SECTION */}
         {recentDonors.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-            className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5 mb-8"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5 mb-8">
             <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-bold mb-4 text-center">Recent Supporters</p>
             <div className="space-y-3">
               {recentDonors.map((donor, i) => (
                 <div key={i} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#FFC600]/10 border border-[#FFC600]/20 flex items-center justify-center text-[#FFC600] text-xs font-bold">
-                      {donor.name[0]}
-                    </div>
+                    <div className="w-8 h-8 rounded-full bg-[#FFC600]/10 border border-[#FFC600]/20 flex items-center justify-center text-[#FFC600] text-xs font-bold">{donor.name[0]}</div>
                     <div>
                       <p className="text-white/70 text-xs font-bold">{donor.name}</p>
                       {donor.message && <p className="text-white/30 text-[10px]">{donor.message}</p>}
@@ -407,17 +355,11 @@ export default function Crowdfunding() {
           </motion.div>
         )}
 
-        {/* ✅ CTA BUTTON */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="text-center"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.6 }} className="text-center">
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
+            onClick={() => setShowContributionModal(true)}
             className="group relative inline-flex items-center gap-3 bg-[#FFC600] text-black px-10 py-5 rounded-2xl font-black text-lg md:text-xl uppercase tracking-wider overflow-hidden shadow-[0_8px_30px_rgba(255,198,0,0.3)] hover:shadow-[0_12px_40px_rgba(255,198,0,0.5)] transition-all duration-300"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
@@ -429,13 +371,15 @@ export default function Crowdfunding() {
               </svg>
             </span>
           </motion.button>
-
-          <p className="text-white/20 text-[10px] mt-4 font-mono tracking-wider uppercase">
-            ● Secure Transaction ● Tax Benefits Available
-          </p>
+          <p className="text-white/20 text-[10px] mt-4 font-mono tracking-wider uppercase">● Secure Transaction ● Tax Benefits Available</p>
         </motion.div>
-
       </div>
+
+      <ContributionModal 
+        isOpen={showContributionModal}
+        onClose={() => setShowContributionModal(false)}
+        campaignId={stats.campaignId || "d599abca-8174-47f0-baaa-9cad315b2636"}
+      />
     </section>
   );
 }

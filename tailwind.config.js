@@ -11,7 +11,7 @@ module.exports = {
         /* --- PRIMARY: Racing Yellow — unchanged, core brand --- */
         "primary":                    "#FFC600",
         "on-primary":                 "#1A1300",
-        "primary-container":          "#F5C518", // slightly warmer gold for CTAs
+        "primary-container":          "#F5C518",
         "on-primary-container":       "#332700",
         "primary-fixed":              "#FFD64D",
         "primary-fixed-dim":          "#FFC600",
@@ -20,53 +20,52 @@ module.exports = {
         "inverse-primary":            "#CC9E00",
         "surface-tint":               "#FFC600",
 
-        /* --- BACKGROUND & SURFACES: Pearl / Ice Blue (replaces Deep Navy bg) --- */
-        "background":                 "#E8EDF5", // Pearl — main page bg
-        "on-background":              "#0D1A3A", // Deep navy type on light bg
-        "surface":                    "#FFFFFF", // Pure white cards/panels
+        /* --- BACKGROUND & SURFACES --- */
+        "background":                 "#E8EDF5",
+        "on-background":              "#0D1A3A",
+        "surface":                    "#FFFFFF",
         "on-surface":                 "#0D1A3A",
-        "surface-variant":            "#D4DCE8", // Slightly darker pearl for alt sections
-        "on-surface-variant":         "#3D5070", // Body paragraph text
-        "inverse-surface":            "#0D1A3A", // Dark sections (hero, footer, roadmap)
-        "inverse-on-surface":         "#E8EDF5", // Text on dark inverse sections
+        "surface-variant":            "#D4DCE8",
+        "on-surface-variant":         "#3D5070",
+        "inverse-surface":            "#0D1A3A",
+        "inverse-on-surface":         "#E8EDF5",
 
-        /* Surface Elevations (lightest → darkest within light theme) */
-        "surface-dim":                "#D4DCE8", // Dimmed pearl
-        "surface-bright":             "#FFFFFF", // Brightest — active card
-        "surface-container-lowest":   "#F4F7FB", // Near white
-        "surface-container-low":      "#EDF1F8", // Slight pearl tint
-        "surface-container":          "#E8EDF5", // Default pearl bg
-        "surface-container-high":     "#D4DCE8", // Visible surface separation
-        "surface-container-highest":  "#C0CEDF", // Strongest surface tone
+        "surface-dim":                "#D4DCE8",
+        "surface-bright":             "#FFFFFF",
+        "surface-container-lowest":   "#F4F7FB",
+        "surface-container-low":      "#EDF1F8",
+        "surface-container":          "#E8EDF5",
+        "surface-container-high":     "#D4DCE8",
+        "surface-container-highest":  "#C0CEDF",
 
-        "outline":                    "#8FA8C8", // Muted blue-gray borders
-        "outline-variant":            "#C8D4E4", // Subtle divider lines
+        "outline":                    "#8FA8C8",
+        "outline-variant":            "#C8D4E4",
 
-        /* --- SECONDARY: Muted Navy Slate (replaces flat grays) --- */
-        "secondary":                  "#3D5070", // Body text / subheadings
+        /* --- SECONDARY --- */
+        "secondary":                  "#3D5070",
         "on-secondary":               "#FFFFFF",
-        "secondary-container":        "#C0CEDF", // Chip / tag backgrounds
+        "secondary-container":        "#C0CEDF",
         "on-secondary-container":     "#0D1A3A",
         "secondary-fixed":            "#8FA8C8",
         "secondary-fixed-dim":        "#6B8AAD",
         "on-secondary-fixed":         "#0D1A3A",
         "on-secondary-fixed-variant": "#1E3A6E",
 
-        /* --- TERTIARY: Link / Active Nav Blue (from Lovable) --- */
-        "tertiary":                   "#1B6FE8", // Active nav, links
+        /* --- TERTIARY --- */
+        "tertiary":                   "#1B6FE8",
         "on-tertiary":                "#FFFFFF",
-        "tertiary-container":         "#E6F1FB", // Light blue chip bg
+        "tertiary-container":         "#E6F1FB",
         "on-tertiary-container":      "#0C447C",
         "tertiary-fixed":             "#B5D4F4",
         "tertiary-fixed-dim":         "#85B7EB",
         "on-tertiary-fixed":          "#042C53",
         "on-tertiary-fixed-variant":  "#185FA5",
 
-        /* --- DARK NAVY: For hero, roadmap, footer dark sections --- */
-        "navy":                       "#0D1A3A", // Primary dark section bg
-        "navy-elevated":              "#1E3A6E", // Elevated surface within dark sections
-        "navy-muted":                 "#8FA8C8", // Muted text on dark bg
-        "navy-subtle":                "#C8D4E4", // Subtle text on dark bg
+        /* --- DARK NAVY --- */
+        "navy":                       "#0D1A3A",
+        "navy-elevated":              "#1E3A6E",
+        "navy-muted":                 "#8FA8C8",
+        "navy-subtle":                "#C8D4E4",
 
         /* --- ERRORS --- */
         "error":                      "#C0392B",
@@ -108,6 +107,23 @@ module.exports = {
         "headline-md":  ["32px", { lineHeight: "1.3",  letterSpacing: "0em",    fontWeight: "600" }],
         "label-caps":   ["12px", { lineHeight: "1",    letterSpacing: "0.15em", fontWeight: "700" }],
         "headline-lg":  ["48px", { lineHeight: "1.2",  letterSpacing: "-0.02em",fontWeight: "600" }],
+      },
+
+      // ✅ MARQUEE ANIMATIONS - Added here
+      animation: {
+        'marquee': 'marquee 30s linear infinite',
+        'marquee-reverse': 'marquee-reverse 30s linear infinite',
+        'marquee-slow': 'marquee 50s linear infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        'marquee-reverse': {
+          '0%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(0%)' },
+        },
       },
     },
   },
