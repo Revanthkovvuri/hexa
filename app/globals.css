@@ -3,12 +3,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === Base Reset & Dark Mode Enforcement === */
-html,
-body,
-#__next,
-[data-nextjs-root] {
-  background: #000000 !important;
+/* ============================================
+   BLACK BACKGROUND - MUST BE AFTER @tailwind
+   ============================================ */
+html {
+  background-color: #000000 !important;
+}
+
+body {
+  background-color: #000000 !important;
   color: #ffffff;
   font-family: var(--font-inter), sans-serif;
   overflow-x: hidden;
@@ -17,22 +20,9 @@ body,
   padding: 0;
 }
 
-/* === Custom Silk Background === */
-.silk-bg {
-  background: 
-    radial-gradient(ellipse at 20% 50%, rgba(30, 30, 40, 0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(40, 40, 60, 0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(20, 20, 35, 0.5) 0%, transparent 50%),
-    #000000;
-}
-
-/* Glass card style */
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
+/* === Material Icons === */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 ::selection {
@@ -40,16 +30,9 @@ body,
   color: #000000;
 }
 
-/* === Material Icons === */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-/* === Glassmorphism Panel === */
+/* === Glassmorphism === */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -76,29 +59,7 @@ body,
   background: #FFC600;
 }
 
-/* === Animations === */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.4); }
-}
-
-/* === Subtle Background Animation === */
-.bg-subtle-drift {
-  animation: bgDrift 20s ease-in-out infinite;
-}
-
-@keyframes bgDrift {
-  0%, 100% { background-position: 0% 0%; }
-  25% { background-position: 2% 1%; }
-  50% { background-position: 0% 2%; }
-  75% { background-position: -1% 1%; }
-}
-
-/* Roadmap styles - updated for dark theme */
+/* === Roadmap Section === */
 .roadmap-section {
   position: relative;
   width: 100%;
@@ -177,7 +138,7 @@ body,
   font-size: 12px;
   letter-spacing: 0.15em;
   opacity: 0.8;
-  text-shadow: 0 2px 4px rgba(13, 26, 58, 0.8);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .roadmap-phase-name {
@@ -185,7 +146,7 @@ body,
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  text-shadow: 0 2px 6px rgba(13, 26, 58, 0.9);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
 /* Checkered flag */
@@ -226,7 +187,7 @@ body,
   right: 20px;
   width: 280px;
   padding: 20px;
-  background: rgba(13, 26, 58, 0.88);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 198, 0, 0.15);
   border-radius: 8px;
@@ -260,6 +221,7 @@ body,
   font-family: var(--font-space-grotesk), monospace;
   font-size: 9px;
   letter-spacing: 0.1em;
+  color: #8FA8C8;
 }
 
 .roadmap-tooltip-title {
@@ -305,7 +267,7 @@ body,
   gap: 20px;
   z-index: 15;
   padding: 16px 20px;
-  background: rgba(13, 26, 58, 0.75);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 198, 0, 0.1);
   border-radius: 8px;
@@ -340,7 +302,7 @@ body,
   top: -3px;
   width: 5px;
   height: 9px;
-  background: #0D1A3A;
+  background: #000000;
   border-radius: 2px;
   transform: translateX(-50%);
 }
@@ -434,8 +396,8 @@ body,
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(13, 26, 58, 0.6);
-  border: 1px solid rgba(13, 26, 58, 0.15);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -471,7 +433,7 @@ body,
 }
 
 .roadmap-legend-locked .roadmap-legend-dot {
-  background: #C8D4E4;
+  background: #555555;
 }
 
 .roadmap-legend-phase {
@@ -509,13 +471,11 @@ body,
 .roadmap-loader-ring {
   width: 40px;
   height: 40px;
-  border: 2px solid #C8D4E4;
+  border: 2px solid #555555;
   border-top-color: #FFC600;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-
-/* === Cinematic Framer Motion Additions === */
 
 .roadmap-scanlines {
   position: absolute;
@@ -523,7 +483,7 @@ body,
   background: linear-gradient(
     to bottom,
     transparent 50%,
-    rgba(13, 26, 58, 0.02) 50%
+    rgba(0, 0, 0, 0.03) 50%
   );
   background-size: 100% 4px;
   pointer-events: none;
@@ -535,13 +495,12 @@ body,
   text-shadow: 0 0 15px rgba(255, 198, 0, 0.4);
 }
 
-@keyframes dotFloat {
-  0%, 100% {
-    opacity: var(--opacity-min);
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    opacity: var(--opacity-max);
-    transform: translate(var(--drift-x), var(--drift-y)) scale(1.4);
-  }
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
 }
