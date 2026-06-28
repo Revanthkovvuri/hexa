@@ -1,5 +1,5 @@
 import "./globals.css";
-import PantherAnimation from "@/components/PantherAnimation";
+import PantherAnimationWrapper from "@/components/PantherAnimationWrapper";
 
 export const metadata = {
   title: "HEXAWATTS RACING TEAM | ENGINEERED FOR SPEED",
@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-black">
-        <PantherAnimation
+        <PantherAnimationWrapper
           size={850}
           opacity={0.75}
           glowColor="#00DCC8"

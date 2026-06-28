@@ -22,5 +22,19 @@ export default function Home() {
       <ScrollReveal><Roadmap /></ScrollReveal>
       <Footer />
     </div>
+    <>
+      <PageLoader isLoading={isLoading} />
+      
+      <div className="bg-black text-white font-body-md overflow-x-hidden pt-32 md:pt-40">
+        <Navbar />
+        <Hero />
+        <ScrollReveal><Crowdfunding /></ScrollReveal>
+        <ScrollReveal><CarSpecs2D /></ScrollReveal>
+        <ScrollReveal><Performance /></ScrollReveal>
+        <ScrollReveal><Roadmap /></ScrollReveal>
+        <ScrollReveal><Team /></ScrollReveal>
+        <Footer />
+      </div>
+    </>
   );
 }
