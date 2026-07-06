@@ -1,27 +1,44 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { createClient } from '@supabase/supabase-js';
 import CarViewer from './car-viewer/CarViewer';
 
-const ALL_SPECS = [
-  // Mechanical
-  { id: "01", category: "CHASSIS", title: "Space Frame", desc: "AISI 4130 Chromoly steel structure with optimized Torsional Rigidity.", icon: "🏗️", stat: "2,200", unit: "Nm/deg", type: "mechanical", color: "#FFC600" },
-  { id: "02", category: "STEERING", title: "Rack & Pinion", desc: "Custom designed steering geometry for optimal driver feedback.", icon: "🎯", stat: "12:1", unit: "Ratio", type: "mechanical", color: "#00C8E0" },
-  { id: "03", category: "SUSPENSION", title: "Double Wishbone", desc: "Push-rod actuated Ohlins TTX25 dampers with adjustable anti-roll bars.", icon: "🛞", stat: "4", unit: "Way Adj", type: "mechanical", color: "#FF6B6B" },
-  { id: "04", category: "DRIVETRAIN", title: "Direct Drive", desc: "Optimized gear reduction system for maximum torque transfer.", icon: "⚙️", stat: "98", unit: "% Eff.", type: "mechanical", color: "#4ECDC4" },
-  // Electrical
-  { id: "05", category: "BATTERY", title: "Accumulator Pack", desc: "LCO cell chemistry with custom BMS monitoring 144 series segments.", icon: "🔋", stat: "6.4", unit: "kWh", type: "electrical", color: "#FFC600" },
-  { id: "06", category: "MOTOR", title: "Emrax 228 MV", desc: "80 kW peak power output with custom liquid cooling system.", icon: "⚡", stat: "80", unit: "kW", type: "electrical", color: "#00C8E0" },
-  { id: "07", category: "TELEMETRY", title: "Real-time DAQ", desc: "CAN-based communication with 120Hz sensor sampling for G-force mapping.", icon: "📡", stat: "120", unit: "Hz", type: "electrical", color: "#FF6B6B" },
-];
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function Specs() {
+  const [mechanicalSpecs, setMechanicalSpecs] = useState([]);
+  const [electricalSpecs, setElectricalSpecs] = useState([]);
   const [activePart, setActivePart] = useState(null);
-  const [expandedCard, setExpandedCard] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSpecs() {
+      try {
+        const [mechRes, elecRes] = await Promise.all([
+          supabase.from('mechanical_specs').select('*').order('display_order'),
+          supabase.from('electrical_specs').select('*').order('display_order'),
+        ]);
+
+        if (mechRes.data) setMechanicalSpecs(mechRes.data);
+        if (elecRes.data) setElectricalSpecs(elecRes.data);
+      } catch (error) {
+        console.error('Error fetching specs:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSpecs();
+  }, []);
+
+  const allSpecs = [...mechanicalSpecs, ...electricalSpecs];
 
   return (
     <section className="py-20 md:py-28 relative overflow-hidden" id="specs">
-      {/* Animated grid background */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
@@ -29,7 +46,6 @@ export default function Specs() {
         }}
       />
       
-      {/* Glow orbs */}
       <div className="absolute top-20 left-10 w-[400px] h-[400px] bg-[#00C8E0]/8 blur-[150px] rounded-full" />
       <div className="absolute bottom-20 right-10 w-[400px] h-[400px] bg-[#FFC600]/8 blur-[150px] rounded-full" />
 
@@ -40,7 +56,7 @@ export default function Specs() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] px-4 py-2 rounded-full mb-8"
+            className="inline-flex items-center gap-2 bg-black border border-white/[0.08] px-4 py-2 rounded-full mb-8"
           >
             <span className="text-[10px] font-mono text-[#00C8E0] tracking-[0.3em]">SYS:SPECS_LOADED</span>
             <span className="w-1.5 h-1.5 bg-[#00C8E0] rounded-full animate-pulse" />
@@ -59,7 +75,7 @@ export default function Specs() {
           </motion.h2>
         </div>
 
-        {/* 3D Viewer - Full Width */}
+        {/* 3D Viewer */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -68,120 +84,112 @@ export default function Specs() {
           <CarViewer activePart={activePart} onPartClick={setActivePart} />
         </motion.div>
 
-        {/* Specs - Bento Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-min">
-          {ALL_SPECS.map((spec, index) => {
-            const isActive = activePart === spec.category;
-            const isExpanded = expandedCard === spec.id;
-            
-            // Make some cards span more columns for visual interest
-            const spanClass = index === 0 || index === 3 || index === 5 
-              ? 'md:col-span-2 md:row-span-1' 
-              : index === 6 
-                ? 'md:col-span-2 lg:col-span-2' 
-                : '';
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center gap-2 bg-black border border-white/[0.08] px-4 py-2 rounded-full">
+              <span className="w-1.5 h-1.5 bg-[#FFC600] rounded-full animate-pulse" />
+              <span className="text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase">Loading Specifications...</span>
+            </div>
+          </div>
+        )}
 
-            return (
-              <motion.div
-                key={spec.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => {
-                  setActivePart(isActive ? null : spec.category);
-                  setExpandedCard(isExpanded ? null : spec.id);
-                }}
-                whileHover={{ scale: 1.02, zIndex: 10 }}
-                className={`${spanClass} relative group cursor-pointer overflow-hidden rounded-3xl border transition-all duration-500 ${
-                  isActive
-                    ? 'bg-white/[0.04] border-white/20 shadow-[0_0_40px_rgba(0,200,224,0.1)]'
-                    : 'bg-white/[0.01] border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.02]'
-                }`}
-              >
-                {/* Diagonal shine on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        {/* Specs Grid */}
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {allSpecs.map((spec, index) => {
+              const isActive = activePart === spec.name;
+              const accentColor = spec.category === 'mechanical' ? '#FFC600' : '#00C8E0';
+              
+              return (
+                <motion.div
+                  key={spec.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => setActivePart(isActive ? null : spec.name)}
+                  whileHover={{ scale: 1.02 }}
+                  className={`relative group cursor-pointer overflow-hidden rounded-2xl border shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-500 ${
+                    isActive
+                      ? 'bg-black border-white/20'
+                      : 'bg-black border-white/[0.08] hover:border-white/[0.15]'
+                  }`}
+                >
+                  {/* Left accent line */}
+                  <div
+                    className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `linear-gradient(to bottom, ${accentColor}, ${accentColor}50, transparent)`,
+                    }}
+                  />
 
-                <div className="p-6 md:p-8 h-full flex flex-col justify-between">
-                  {/* Top Section */}
-                  <div>
-                    {/* ID & Type Badge */}
-                    <div className="flex items-center justify-between mb-6">
-                      <span className="font-mono text-[10px] text-white/20 tracking-[0.2em]">
-                        [{spec.id}]
-                      </span>
-                      <span className={`text-[9px] font-bold tracking-[0.2em] uppercase px-2 py-1 rounded-md ${
-                        spec.type === 'mechanical' 
-                          ? 'bg-[#00C8E0]/10 text-[#00C8E0]' 
-                          : 'bg-[#FFC600]/10 text-[#FFC600]'
+                  <div className="p-6 md:p-7 h-full flex flex-col">
+                    {/* Top Section */}
+                    <div>
+                      {/* Type Badge */}
+                      <div className="flex items-center justify-between mb-5">
+                        <span className={`text-[9px] font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-md ${
+                          spec.category === 'mechanical' 
+                            ? 'bg-[#FFC600]/10 text-[#FFC600]' 
+                            : 'bg-[#00C8E0]/10 text-[#00C8E0]'
+                        }`}>
+                          {spec.category}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-xl md:text-2xl font-black mb-3 transition-colors duration-300 ${
+                        isActive ? 'text-white' : 'text-white/80 group-hover:text-white'
                       }`}>
-                        {spec.type}
-                      </span>
+                        {spec.name}
+                      </h3>
+
+                      {/* Description */}
+                      {spec.description && (
+                        <p className="text-sm text-white/50 leading-relaxed mb-5">
+                          {spec.description}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Icon */}
-                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-500">
-                      {spec.icon}
-                    </div>
+                    {/* Details Points - Always Visible */}
+                    {spec.details && spec.details.length > 0 && (
+                      <div className="mt-auto pt-5 border-t border-white/[0.06]">
+                        <ul className="space-y-2.5">
+                          {spec.details.map((detail, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-sm text-white/65 font-medium">
+                              <span
+                                className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: accentColor, boxShadow: `0 0 6px ${accentColor}60` }}
+                              />
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                    {/* Category */}
-                    <span className="text-[10px] font-bold text-white/30 tracking-[0.2em] uppercase block mb-2">
-                      {spec.category}
-                    </span>
-
-                    {/* Title */}
-                    <h3 className={`text-xl md:text-2xl font-black mb-3 transition-colors duration-300 ${
-                      isActive ? 'text-white' : 'text-white/70 group-hover:text-white'
-                    }`}>
-                      {spec.title}
-                    </h3>
-
-                    {/* Description - visible on expand or hover */}
-                    <motion.p
-                      animate={{ 
-                        height: isExpanded ? 'auto' : '0px',
-                        opacity: isExpanded ? 1 : 0,
-                        marginTop: isExpanded ? 8 : 0
-                      }}
-                      className="text-xs text-white/40 leading-relaxed overflow-hidden"
-                    >
-                      {spec.desc}
-                    </motion.p>
+                    {/* Active glow */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeSpecGlow"
+                        className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full blur-[40px]"
+                        style={{ background: accentColor, opacity: 0.15 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
                   </div>
 
-                  {/* Bottom Section - Big Stat */}
-                  <div className="mt-6 pt-6 border-t border-white/[0.05]">
-                    <div className="flex items-baseline gap-1">
-                      <span className={`text-4xl md:text-5xl font-black tracking-tighter transition-all duration-500 ${
-                        isActive ? 'text-white' : 'text-white/40 group-hover:text-white/60'
-                      }`}>
-                        {spec.stat}
-                      </span>
-                      <span className="text-sm text-white/20 font-bold uppercase tracking-wider">
-                        {spec.unit}
-                      </span>
-                    </div>
+                  {/* Corner accent */}
+                  <div className="absolute top-0 right-0 w-10 h-10 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute top-0 right-0 w-1.5 h-10 bg-gradient-to-b from-white/10 to-transparent rotate-45 translate-x-3 -translate-y-3" />
                   </div>
-
-                  {/* Active glow indicator */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeSpecGlow"
-                      className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full blur-[40px]"
-                      style={{ background: spec.color, opacity: 0.3 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </div>
-
-                {/* Corner accent line */}
-                <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-0 right-0 w-2 h-12 bg-gradient-to-b from-white/10 to-transparent rotate-45 translate-x-4 -translate-y-4" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Bottom Stats Bar */}
         <motion.div

@@ -1,145 +1,87 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import Image from 'next/image';
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const TOTAL_FRAMES = 30;
-
-const FRAME_NAMES = Array.from({ length: TOTAL_FRAMES }, (_, i) =>
-  `/images/ezgif-split/frame_${String(i).padStart(2, '0')}_delay-0.1s.gif`
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function PantherAnimation({
   size = 150,
   opacity = 0.75,
   glowColor = '#00DCC8',
 }) {
-  const containerRef   = useRef(null);
-  const currentFrame   = useRef(0);
-  const rafRef         = useRef(null);
-  const scrollTimeout  = useRef(null);
-  const isScrolling    = useRef(false);
+  const [pantherUrl, setPantherUrl] = useState(null);
 
-  // ── Decode all frames into GPU memory on mount ──────────────────────────────
   useEffect(() => {
-    if (!containerRef.current) return;
-    const imgs = containerRef.current.querySelectorAll('img');
-    imgs.forEach((img) => {
-      if (img.complete) {
-        img.decode().catch(() => {});
+    async function fetchPanther() {
+      const { data } = await supabase
+        .from('hero_slides')
+        .select('image_url')
+        .eq('id', 'e8cdc5ed-e063-4449-9a48-70af52a4948e')
+        .single();
+
+      if (data?.image_url) {
+        console.log('✅ Panther image loaded:', data.image_url);
+        setPantherUrl(data.image_url);
       } else {
-        img.addEventListener('load', () => img.decode().catch(() => {}), { once: true });
+        console.log('❌ No panther image found');
       }
-    });
+    }
+
+    fetchPanther();
   }, []);
 
-  // ── Direct DOM frame switch — zero React re-renders ─────────────────────────
-  const showFrame = useCallback((nextFrame) => {
-    if (!containerRef.current) return;
-    if (nextFrame === currentFrame.current) return;
+  // Show placeholder while loading
+  if (!pantherUrl) {
+    return (
+      <div
+        id="panther-overlay"
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          zIndex: 0,
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          pointerEvents: 'none',
+          width: `${size}px`,
+          height: `${size}px`,
+          opacity: 0,
+        }}
+      />
+    );
+  }
 
-    const imgs = containerRef.current.querySelectorAll('img');
-    imgs[currentFrame.current].style.opacity = '0';
-    imgs[nextFrame].style.opacity = '1';
-
-    currentFrame.current = nextFrame;
-  }, []);
-
-  // ── Glow pulse ──────────────────────────────────────────────────────────────
-  const [glowActive, setGlowActive] = useState(false);
-
-  const triggerGlow = useCallback((active) => {
-    if (isScrolling.current === active) return;
-    isScrolling.current = active;
-    setGlowActive(active);
-  }, []);
-
-  // ── Scroll handler ──────────────────────────────────────────────────────────
-  const handleScroll = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-    rafRef.current = requestAnimationFrame(() => {
-      const scrolled  = window.scrollY;
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const progress  = maxScroll > 0 ? scrolled / maxScroll : 0;
-      const nextFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
-
-      showFrame(nextFrame);
-      triggerGlow(true);
-
-      clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = setTimeout(() => triggerGlow(false), 150);
-    });
-  }, [showFrame, triggerGlow]);
-
-  // ── Event listener lifecycle ────────────────────────────────────────────────
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafRef.current)        cancelAnimationFrame(rafRef.current);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    };
-  }, [handleScroll]);
-
-  // ── Derived glow values ─────────────────────────────────────────────────────
-  const glowSize  = glowActive ? '32px' : '18px';
-  const glowAlpha = glowActive ? '60'   : '30';
-
-  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div
       id="panther-overlay"
       aria-hidden="true"
       style={{
-        position:      'fixed',
-        zIndex:        0, // ✅ FIX: Pushes the panther into the background
-        top:           '60%',
-        left:          '50%',
-        transform:     'translate(-50%, -50%)',
+        position: 'fixed',
+        zIndex: 0,
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
         pointerEvents: 'none',
-        userSelect:    'none',
-        overflow:      'hidden',
-        width:         `${size}px`,
-        height:        `${size}px`,
-        filter: [
-          `opacity(${opacity})`,
-          `drop-shadow(0 0 ${glowSize} ${glowColor}${glowAlpha})`,
-          `drop-shadow(0 0 60px ${glowColor}18)`,
-        ].join(' '),
-        transition: 'filter 0.25s ease',
+        userSelect: 'none',
+        width: `${size}px`,
+        height: `${size}px`,
+        filter: `opacity(${opacity}) drop-shadow(0 0 30px ${glowColor}40)`,
       }}
     >
-      <div
-        ref={containerRef}
-        style={{ position: 'relative', width: '100%', height: '100%' }}
-      >
-        {FRAME_NAMES.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            width={size}
-            height={size}
-            style={{
-              position:    'absolute',
-              top:         0,
-              left:        0,
-              width:       '100%',
-              height:      '100%',
-              objectFit:   'contain',
-              display:     'block',
-              mixBlendMode:'screen',
-              opacity:      i === 0 ? 1 : 0,
-              willChange:  'opacity',
-            }}
-          />
-        ))}
-      </div>
+      <Image
+        src={pantherUrl}
+        alt="Hexawatts Panther"
+        fill
+        className="object-contain"
+        style={{ mixBlendMode: 'screen' }}
+        unoptimized
+        priority
+      />
     </div>
   );
 }

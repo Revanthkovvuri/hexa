@@ -1,243 +1,242 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { createClient } from '@supabase/supabase-js';
+import CarViewer from './car-viewer/CarViewer';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// ─── Domain / spec data ───────────────────────────────────────────────────────
-
-const DOMAINS = [
-  {
-    id: 'chassis',
-    name: 'Chassis',
-    subTeam: 'Frame & Composites',
-    icon: '🏗️',
-    description: 'Tubular steel space-frame with carbon-fiber monocoque crash structure ensuring driver safety, torsional rigidity, and a lightweight foundational structure for optimal performance.',
-    specs: [
-      { label: 'Wheelbase', value: '1550 mm' },
-      { label: 'Track (F/R)', value: '1240 / 1200 mm' },
-      { label: 'Frame Weight', value: '32 kg' },
-      { label: 'Material', value: 'AISI 4130 Chromoly' },
-    ],
-  },
-  {
-    id: 'powertrain',
-    name: 'Powertrain',
-    subTeam: 'EV Drive',
-    icon: '⚡',
-    description: 'Twin AMK rear motors with custom inverter delivering 80 kW peak output. Custom-built high-voltage battery pack providing consistent and reliable power delivery.',
-    specs: [
-      { label: 'Peak Power', value: '80 kW' },
-      { label: 'Torque', value: '240 Nm' },
-      { label: 'Battery', value: '7.2 kWh Li-ion' },
-      { label: '0–100 km/h', value: '3.4 s' },
-    ],
-  },
-  {
-    id: 'braking',
-    name: 'Braking',
-    subTeam: 'Stopping Systems',
-    icon: '🛑',
-    description: 'Four-disc hydraulic braking system with regenerative blending under driver-set bias. Precision-engineered for maximum deceleration performance and consistency.',
-    specs: [
-      { label: 'Disc Diameter', value: '220 mm' },
-      { label: 'Caliper', value: 'ISR 22-048' },
-      { label: 'Regen Mix', value: 'Up to 30%' },
-      { label: 'Decel Peak', value: '1.8 g' },
-    ],
-  },
-  {
-    id: 'aero',
-    name: 'Aerodynamics',
-    subTeam: 'Aero',
-    icon: '🌬️',
-    description: 'Multi-element front/rear wings and diffuser tuned through 60+ CFD iterations. Carbon pre-preg construction optimised for maximum downforce at minimum drag.',
-    specs: [
-      { label: 'Downforce @ 60 km/h', value: '85 kgf' },
-      { label: 'Drag Coefficient', value: '0.92' },
-      { label: 'L/D Ratio', value: '3.1' },
-      { label: 'Wing Material', value: 'Carbon Pre-preg' },
-    ],
-  },
-  {
-    id: 'electronics',
-    name: 'Electronics',
-    subTeam: 'Vehicle Control',
-    icon: '🔌',
-    description: 'Custom VCU running torque-vectoring, traction control and real-time telemetry over CAN-FD. 120+ sensors feeding live data to pitlane engineers.',
-    specs: [
-      { label: 'ECU', value: 'Custom STM32-H7' },
-      { label: 'CAN Channels', value: '4× CAN-FD' },
-      { label: 'Sensors', value: '120+' },
-      { label: 'Telemetry', value: 'LoRa 2.4 GHz' },
-    ],
-  },
-  {
-    id: 'suspension',
-    name: 'Suspension',
-    subTeam: 'Vehicle Dynamics',
-    icon: '🔄',
-    description: 'Pull-rod actuated double-wishbone front, push-rod rear with fully adjustable ARB. Independent camber and caster adjustments for optimal cornering performance.',
-    specs: [
-      { label: 'Geometry', value: 'Double Wishbone' },
-      { label: 'Damper', value: 'Öhlins TTX25' },
-      { label: 'Travel', value: '60 mm' },
-      { label: 'Roll Center', value: 'Tunable' },
-    ],
-  },
-];
-
-// ─── Colour tokens ────────────────────────────────────────────────────────────
-const GOLD    = '#FFC600';
-const TEAL    = '#00C8E0';
-const NAVY    = '#0D1A3A';
-const NAVY_E  = '#1E3A6E';
-
-// ─── Main export ──────────────────────────────────────────────────────────────
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function CarSpecs2D() {
-  const [active, setActive] = useState(null);
+  const [mechanicalSpecs, setMechanicalSpecs] = useState([]);
+  const [electricalSpecs, setElectricalSpecs] = useState([]);
+  const [activePart, setActivePart] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSpecs() {
+      try {
+        const [mechRes, elecRes] = await Promise.all([
+          supabase.from('mechanical_specs').select('*').order('display_order'),
+          supabase.from('electrical_specs').select('*').order('display_order'),
+        ]);
+
+        if (mechRes.data) setMechanicalSpecs(mechRes.data);
+        if (elecRes.data) setElectricalSpecs(elecRes.data);
+      } catch (error) {
+        console.error('Error fetching specs:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSpecs();
+  }, []);
 
   return (
-    // relative z-10 blocks the background panther from bleeding up
-    <section className="py-16 md:py-24 relative z-10" id="specs-2d">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-8">
+    <section className="py-20 md:py-28 relative overflow-hidden" id="specs-2d">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#FFC600]/3 blur-[180px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#00C8E0]/3 blur-[130px] rounded-full pointer-events-none" />
 
-        {/* Header */}
-        <div className="text-center mb-12 space-y-3 relative z-20">
-          <h2 className="font-headline-md md:font-headline-lg uppercase italic tracking-tighter text-navy">
-            HW-06 <span className="text-primary">THUNDERSTRIKE</span>
+      <div className="max-w-[1440px] mx-auto px-6 md:px-8 relative z-10">
+
+        {/* ── Section Header ── */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 bg-black border border-white/[0.08] px-5 py-2 rounded-full mb-6">
+            <span className="w-2 h-2 bg-[#FFC600] rounded-full animate-pulse shadow-[0_0_8px_rgba(255,198,0,0.8)]" />
+            <span className="text-[#FFC600] text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase">
+              Technical Blueprint
+            </span>
+          </div>
+
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-[0.95] mb-4">
+            CAR{" "}
+            <span className="text-[#FFC600] italic drop-shadow-[0_0_20px_rgba(255,198,0,0.4)]">
+              SPECIFICATIONS
+            </span>
           </h2>
-          <div className="h-1 w-24 bg-primary mx-auto" />
-          <p className="text-secondary font-body-md max-w-xl mx-auto">
-            Six engineering domains. One car. Click a domain card to explore the systems behind every lap.
+          
+          <p className="text-[#00C8E0]/60 text-sm max-w-lg mx-auto leading-relaxed">
+            Every component engineered for maximum performance and reliability
           </p>
         </div>
 
-        {/* Grid: 2D Image + domain cards */}
-        <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr] items-start">
-
-          {/* 2D Image Container */}
+        {/* ── Hero Image ── */}
+        <div className="flex justify-center mb-16">
           <div
-            className="relative z-20 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg"
+            className="relative rounded-2xl overflow-hidden flex items-center justify-center shadow-lg w-full max-w-5xl
+              bg-black border border-white/[0.08]"
             style={{
-              aspectRatio: '4/3',
-              backgroundColor: NAVY,
-              backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, ${NAVY_E} 50%, ${NAVY} 100%)`,
-              border: `1px solid ${NAVY_E}`,
-              boxShadow: `0 0 48px rgba(0,200,224,0.07)`,
+              aspectRatio: '16/9',
+              boxShadow: '0 0 48px rgba(0,200,224,0.05)',
             }}
           >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10 pointer-events-none" />
             <img 
               src="/images/car specs photo.jpeg" 
               alt="Hexawatts Racing Car"
-              className="w-full h-full object-contain p-6 relative z-10" 
+              className="w-full h-full object-contain p-4 relative z-10" 
             />
-          </div>
-
-          {/* Domain cards */}
-          <div className="grid grid-cols-2 gap-3 relative z-20">
-            {DOMAINS.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => setActive(d)}
-                className="relative z-30 overflow-hidden rounded-xl p-4 text-left transition-all duration-300 shadow-md"
-                style={{ border: `1px solid ${NAVY_E}`, backgroundColor: NAVY }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = TEAL;
-                  e.currentTarget.style.backgroundColor = NAVY_E;
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = `0 4px 16px rgba(0,200,224,0.15)`;
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = NAVY_E;
-                  e.currentTarget.style.backgroundColor = NAVY;
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div className="flex items-center gap-1.5 mb-1 relative z-10">
-                  <span className="text-xs">{d.icon}</span>
-                  <span className="font-label-caps text-[9px] tracking-widest uppercase" style={{ color: TEAL }}>
-                    {d.subTeam}
-                  </span>
-                </div>
-                <div className="font-grotesk font-black text-white text-sm leading-tight relative z-10">
-                  {d.name}
-                </div>
-              </button>
-            ))}
           </div>
         </div>
-      </div>
 
-      {/* Slide-in spec panel */}
-      <AnimatePresence>
-        {active && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40"
-              style={{ backgroundColor: 'rgba(13,26,58,0.55)', backdropFilter: 'blur(4px)' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActive(null)}
-            />
-            <motion.aside
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto"
-              style={{ backgroundColor: '#ffffff', borderLeft: '1px solid #C8D4E4', boxShadow: '-8px 0 40px rgba(13,26,58,0.12)' }}
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            >
-              <div className="p-6 md:p-8">
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <div
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-label-caps tracking-widest border mb-2"
-                      style={{ borderColor: 'rgba(0,200,224,0.3)', color: TEAL, backgroundColor: 'rgba(0,200,224,0.05)' }}
-                    >
-                      {active.icon} {active.subTeam}
-                    </div>
-                    <h3 className="font-grotesk font-black text-navy text-2xl uppercase tracking-tight">
-                      {active.name}
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setActive(null)}
-                    className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                    style={{ border: '1px solid #C8D4E4', color: '#3D5070' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = NAVY; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#C8D4E4'; }}
-                  >
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
-                </div>
-
-                <p className="text-secondary text-sm leading-relaxed mb-6">{active.description}</p>
-
-                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #E8EDF5' }}>
-                  <div className="px-4 py-2.5" style={{ backgroundColor: '#F4F7FB', borderBottom: '1px solid #E8EDF5' }}>
-                    <span className="font-label-caps text-[9px] tracking-widest text-outline uppercase">Technical Specifications</span>
-                  </div>
-                  <table className="w-full text-sm">
-                    <tbody>
-                      {active.specs.map((s, i) => (
-                        <tr key={s.label} style={{ borderBottom: i < active.specs.length - 1 ? '1px solid #E8EDF5' : 'none' }}>
-                          <td className="px-4 py-3 text-secondary">{s.label}</td>
-                          <td className="px-4 py-3 text-right font-grotesk font-bold" style={{ color: NAVY }}>{s.value}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="mt-6 h-1 rounded-full" style={{ backgroundImage: `linear-gradient(90deg, ${GOLD} 0%, ${TEAL} 100%)` }} />
-              </div>
-            </motion.aside>
-          </>
+        {/* ── Loading State ── */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center gap-2 bg-black border border-white/[0.08] px-4 py-2 rounded-full">
+              <span className="w-1.5 h-1.5 bg-[#FFC600] rounded-full animate-pulse" />
+              <span className="text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase">
+                Loading Specifications...
+              </span>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+
+        {/* ── Mechanical Specs ── */}
+        {!loading && mechanicalSpecs.length > 0 && (
+          <div className="mb-16">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-3 bg-black border border-white/[0.08] px-5 py-2 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 bg-[#FFC600] rounded-full shadow-[0_0_8px_rgba(255,198,0,0.8)] animate-pulse" />
+                <span className="text-[#FFC600] text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase">
+                  Mechanical Systems
+                </span>
+              </div>
+              <h3 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tight">
+                Mechanical Specs
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {mechanicalSpecs.map((spec) => (
+                <div
+                  key={spec.id}
+                  className="group relative rounded-2xl overflow-hidden flex flex-col bg-black border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/[0.15] hover:-translate-y-1 transition-all duration-500"
+                >
+                  {/* Gold accent line */}
+                  <div className="absolute left-0 top-4 bottom-4 w-[2px] rounded-full opacity-50 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-[#FFC600] via-[#FFC600]/50 to-transparent" />
+
+                  {/* Header */}
+                  <div className="p-5 pb-3">
+                    <h4 className="font-black text-white text-lg uppercase tracking-tight">
+                      {spec.name}
+                    </h4>
+                  </div>
+
+                  {/* Image Area */}
+                  <div className="relative w-full overflow-hidden flex items-center justify-center bg-black/40 border-t border-b border-white/[0.06]" style={{ aspectRatio: '4/3' }}>
+                    {spec.image_url ? (
+                      <Image src={spec.image_url} alt={spec.name} fill className="object-contain p-3" unoptimized />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-7xl font-black text-white/5">{spec.name.charAt(0)}</span>
+                        <span className="text-[9px] tracking-widest uppercase mt-2 text-white/15">Photo Coming Soon</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-5 pt-3 flex-1 flex flex-col">
+                    {spec.description && (
+                      <p className="text-white/50 text-xs leading-relaxed mb-4">
+                        {spec.description}
+                      </p>
+                    )}
+
+                    {/* Details Points */}
+                    {spec.details && spec.details.length > 0 && (
+                      <div className="mt-auto pt-4 border-t border-white/[0.06]">
+                        <ul className="space-y-2">
+                          {spec.details.map((detail, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs text-white/60 font-medium">
+                              <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 bg-[#FFC600] shadow-[0_0_6px_rgba(255,198,0,0.4)]" />
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Electrical Specs ── */}
+        {!loading && electricalSpecs.length > 0 && (
+          <div>
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-3 bg-black border border-white/[0.08] px-5 py-2 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 bg-[#00C8E0] rounded-full shadow-[0_0_8px_rgba(0,200,224,0.8)] animate-pulse" />
+                <span className="text-[#00C8E0] text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase">
+                  Electrical Systems
+                </span>
+              </div>
+              <h3 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tight">
+                Electrical Specs
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {electricalSpecs.map((spec) => (
+                <div
+                  key={spec.id}
+                  className="group relative rounded-2xl overflow-hidden flex flex-col bg-black border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/[0.15] hover:-translate-y-1 transition-all duration-500"
+                >
+                  {/* Cyan accent line */}
+                  <div className="absolute left-0 top-4 bottom-4 w-[2px] rounded-full opacity-50 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-[#00C8E0] via-[#00C8E0]/50 to-transparent" />
+
+                  {/* Header */}
+                  <div className="p-5 pb-3">
+                    <h4 className="font-black text-white text-lg uppercase tracking-tight">
+                      {spec.name}
+                    </h4>
+                  </div>
+
+                  {/* Image Area */}
+                  <div className="relative w-full overflow-hidden flex items-center justify-center bg-black/40 border-t border-b border-white/[0.06]" style={{ aspectRatio: '4/3' }}>
+                    {spec.image_url ? (
+                      <Image src={spec.image_url} alt={spec.name} fill className="object-contain p-3" unoptimized />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="text-7xl font-black text-white/5">{spec.name.charAt(0)}</span>
+                        <span className="text-[9px] tracking-widest uppercase mt-2 text-white/15">Photo Coming Soon</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-5 pt-3 flex-1 flex flex-col">
+                    {spec.description && (
+                      <p className="text-white/50 text-xs leading-relaxed mb-4">
+                        {spec.description}
+                      </p>
+                    )}
+
+                    {/* Details Points */}
+                    {spec.details && spec.details.length > 0 && (
+                      <div className="mt-auto pt-4 border-t border-white/[0.06]">
+                        <ul className="space-y-2">
+                          {spec.details.map((detail, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs text-white/60 font-medium">
+                              <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 bg-[#00C8E0] shadow-[0_0_6px_rgba(0,200,224,0.4)]" />
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

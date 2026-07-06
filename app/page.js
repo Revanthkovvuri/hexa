@@ -1,7 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Crowdfunding from "@/components/Crowdfunding";
-import Sponsors from "@/components/Sponsors"; // ✅ Add this import
+import Sponsors from "@/components/Sponsors";
+import JNTUHero from "@/components/JNTUHero";
 import CarSpecs2D from "@/components/CarSpecs2D";
 import Team from "@/components/Team";
 import Performance from "@/components/Performance";
@@ -15,26 +16,13 @@ export default function Home() {
       <Navbar />
       <Hero />
       <ScrollReveal><Crowdfunding /></ScrollReveal>
-      <ScrollReveal><Sponsors /></ScrollReveal>       {/* ✅ Added here - between Crowdfunding and Specs */}
+      <ScrollReveal><Sponsors /></ScrollReveal>
+      <ScrollReveal><JNTUHero /></ScrollReveal>
       <ScrollReveal><CarSpecs2D /></ScrollReveal>
       <ScrollReveal><Team /></ScrollReveal>
       <ScrollReveal><Performance /></ScrollReveal>
       <ScrollReveal><Roadmap /></ScrollReveal>
       <Footer />
     </div>
-    <>
-      <PageLoader isLoading={isLoading} />
-      
-      <div className="bg-black text-white font-body-md overflow-x-hidden pt-32 md:pt-40">
-        <Navbar />
-        <Hero />
-        <ScrollReveal><Crowdfunding /></ScrollReveal>
-        <ScrollReveal><CarSpecs2D /></ScrollReveal>
-        <ScrollReveal><Performance /></ScrollReveal>
-        <ScrollReveal><Roadmap /></ScrollReveal>
-        <ScrollReveal><Team /></ScrollReveal>
-        <Footer />
-      </div>
-    </>
   );
 }

@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
   { label: "Crowdfund", href: "#crowdfund" },
+  { label: "Sponsors", href: "#sponsors" },
   { label: "Specs", href: "#specs-2d" },
   { label: "Team", href: "#team" },
   { label: "Performance", href: "#performance" },
@@ -16,8 +18,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [hoveredLink, setHoveredLink] = useState(null);
 
-  // Track scroll for glass effect intensity
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -26,7 +28,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Track active section for nav indicator
   useEffect(() => {
     const handleActiveSection = () => {
       const sections = NAV_LINKS.map(link => link.href.replace("#", ""));
@@ -56,7 +57,6 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 w-full z-50 flex flex-col">
-      {/* Main Nav Bar - Glass Morphism */}
       <div 
         className={`transition-all duration-500 ${
           scrolled 
@@ -66,85 +66,91 @@ export default function Navbar() {
       >
         <div className="flex justify-between items-center px-6 md:px-8 py-4 max-w-[1440px] mx-auto w-full">
           
-          {/* Logo + Brand */}
-          <div className="flex items-center gap-3 group cursor-pointer">
+          {/* Logo + Brand - Click to refresh */}
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
             <div className="relative">
-              {/* Glow ring behind logo */}
               <div className="absolute inset-0 bg-[#00C8E0]/20 blur-xl rounded-full scale-150 group-hover:bg-[#00C8E0]/40 transition-all duration-500" />
               <Image
                 src="/images/logo.png"
                 alt="HEXAWATTS RACING TEAM LOGO"
                 width={40}
                 height={40}
-                className="h-8 md:h-10 w-auto relative z-10 drop-shadow-[0_0_15px_rgba(0,200,224,0.3)]"
+                className="h-8 md:h-10 w-auto relative z-10 drop-shadow-[0_0_15px_rgba(0,200,224,0.3)] group-hover:drop-shadow-[0_0_20px_rgba(0,200,224,0.5)] transition-all duration-500"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg md:text-xl font-black italic tracking-tighter text-white font-grotesk leading-none">
-                HEXAWATTS
+              <span className="text-sm md:text-base font-black italic tracking-tighter text-white font-grotesk leading-none">
+                JNTU Hexawatts Racing Team
               </span>
-              <span className="text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-[#00C8E0]/70 uppercase leading-none mt-0.5">
-                Racing Team
+              <span className="text-[8px] md:text-[9px] font-bold tracking-[0.2em] text-[#00C8E0]/60 uppercase leading-none mt-0.5">
+                Where Power Meets Geometry
+              </span>
+              <span className="text-[7px] md:text-[8px] font-medium tracking-[0.15em] text-white/30 uppercase leading-none mt-0.5">
+                We Drive with Ingenuity
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop: Nav Links */}
           <nav className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
               const sectionId = link.href.replace("#", "");
               const isActive = activeSection === sectionId;
+              const isHovered = hoveredLink === link.href;
               
               return (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className={`relative px-4 py-2 font-grotesk text-xs tracking-[0.15em] uppercase transition-all duration-300 rounded-lg group ${
+                  onMouseEnter={() => setHoveredLink(link.href)}
+                  onMouseLeave={() => setHoveredLink(null)}
+                  className={`relative px-4 py-2 font-grotesk text-xs tracking-[0.15em] uppercase transition-colors duration-300 rounded-lg ${
                     isActive 
                       ? "text-[#00C8E0]" 
-                      : "text-white/50 hover:text-white"
+                      : "text-white/50 hover:text-[#00C8E0]"
                   }`}
                 >
-                  {/* Hover background */}
-                  <span className={`absolute inset-0 rounded-lg transition-all duration-300 ${
-                    isActive 
-                      ? "bg-[#00C8E0]/10" 
-                      : "bg-transparent group-hover:bg-white/[0.05]"
-                  }`} />
-                  
-                  {/* Active indicator line */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeNavBg"
+                      className="absolute inset-0 rounded-lg bg-[#00C8E0]/10"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+
                   {isActive && (
                     <motion.span
                       layoutId="activeNav"
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[2px] bg-[#00C8E0] rounded-full shadow-[0_0_10px_rgba(0,200,224,0.6)]"
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-[#00C8E0] rounded-full shadow-[0_0_10px_rgba(0,200,224,0.6)]"
                       transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     />
                   )}
                   
-                  <span className="relative z-10">{link.label}</span>
+                  <span className="relative z-10 flex">
+                    {link.label.split("").map((char, i) => (
+                      <motion.span
+                        key={i}
+                        className="inline-block"
+                        animate={isHovered ? {
+                          y: [0, -3, 0],
+                          transition: { duration: 0.3, delay: i * 0.02, ease: "easeOut" }
+                        } : {
+                          y: 0,
+                          transition: { duration: 0.2 }
+                        }}
+                      >
+                        {char === " " ? "\u00A0" : char}
+                      </motion.span>
+                    ))}
+                  </span>
                 </a>
               );
             })}
           </nav>
 
-          {/* CTA + Mobile Toggle */}
+          {/* Mobile Toggle */}
           <div className="flex items-center gap-4">
-            {/* Desktop CTA */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="hidden md:flex items-center gap-2 bg-[#00C8E0]/10 border border-[#00C8E0]/30 hover:border-[#00C8E0]/60 px-5 py-2.5 rounded-full font-grotesk font-bold text-xs tracking-widest text-[#00C8E0] hover:text-white transition-all duration-300 group overflow-hidden relative"
-            >
-              {/* Glow on hover */}
-              <span className="absolute inset-0 bg-gradient-to-r from-[#00C8E0]/0 via-[#00C8E0]/20 to-[#00C8E0]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              <span className="relative z-10 uppercase flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-[#00C8E0] rounded-full shadow-[0_0_8px_rgba(0,200,224,0.8)] animate-pulse" />
-                Support Team
-              </span>
-            </motion.button>
-
-            {/* Mobile Menu Toggle */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-full bg-white/[0.03] border border-white/[0.08] text-white/70 hover:text-[#00C8E0] hover:border-[#00C8E0]/30 transition-all duration-300"
@@ -163,7 +169,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu - Slide Down */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -196,26 +202,11 @@ export default function Navbar() {
                   </motion.a>
                 );
               })}
-              
-              {/* Mobile CTA */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full max-w-[250px] mt-4 bg-[#00C8E0]/10 border border-[#00C8E0]/30 hover:border-[#00C8E0]/60 px-6 py-3 rounded-full font-grotesk font-bold text-xs tracking-widest text-[#00C8E0] hover:text-white transition-all duration-300"
-              >
-                <span className="uppercase flex items-center justify-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-[#00C8E0] rounded-full shadow-[0_0_8px_rgba(0,200,224,0.8)] animate-pulse" />
-                  Support Team
-                </span>
-              </motion.button>
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Top edge glow line */}
       <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#00C8E0]/30 to-transparent opacity-50" />
     </header>
   );
