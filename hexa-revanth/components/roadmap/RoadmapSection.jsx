@@ -93,7 +93,7 @@ export default function RoadmapSection() {
           ROAD TO <span className="text-primary">PODIUM 2027</span>
         </h2>
         <p className="roadmap-header-subtitle">
-          From the workshops of CIET to the Kari Motor Speedway. Follow the evolution of our next-gen platform.
+          From the workshops of JNTUH to the Kari Motor Speedway. Follow the evolution of our next-gen platform.
         </p>
       </motion.div>
 
