@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import supabase from '@/lib/supabase';
 
 export default function PantherAnimation({
-  size = 150,
   opacity = 0.75,
   glowColor = '#00DCC8',
 }) {
@@ -42,16 +41,13 @@ export default function PantherAnimation({
     <div
       id="panther-overlay"
       aria-hidden="true"
+      /* 
+         Increased width percentages to make the panther significantly larger
+         while still remaining fully responsive.
+      */
+      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none z-0 
+                 w-[95%] sm:w-[85%] md:w-[75%] lg:w-[70%] xl:w-[65%] aspect-square"
       style={{
-        position: 'fixed',
-        zIndex: 0,
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        pointerEvents: 'none',
-        userSelect: 'none',
-        width: `${size}px`,
-        height: `${size}px`,
         opacity: opacity,
         filter: `drop-shadow(0 0 30px ${glowColor}40)`,
       }}
@@ -59,11 +55,7 @@ export default function PantherAnimation({
       <img
         src={pantherUrl}
         alt="Hexawatts Panther"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
-        }}
+        className="w-full h-full object-contain"
       />
     </div>
   );
