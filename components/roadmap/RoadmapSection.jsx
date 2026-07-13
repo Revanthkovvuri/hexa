@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CHECKPOINTS, DEFAULT_PROGRESS, COLORS } from './trackData';
 import Tooltip from './Tooltip';
-import ProgressHUD from './ProgressHUD';
 import supabase from '@/lib/supabase';
 
 const TrackCanvas = dynamic(() => import('./TrackCanvas'), {
@@ -34,7 +33,6 @@ export default function RoadmapSection() {
   const [dbCheckpoints, setDbCheckpoints] = useState([]);
   const containerRef = useRef(null);
 
-  // Fetch checkpoints and active checkpoint from Supabase on mount
   useEffect(() => {
     (async () => {
       try {
@@ -43,15 +41,12 @@ export default function RoadmapSection() {
           supabase.from('site_settings').select('*').eq('key', 'roadmap_active_checkpoint').single(),
         ]);
 
-        // FIX (V3): Default missing/empty status to 'locked' so legend class lookups
-        // never break with an undefined `cp.status` when the DB row omits the column.
         const checkpoints = (checkpointsRes.data || []).map(cp => ({
           status: 'locked',
           ...cp,
         }));
         setDbCheckpoints(checkpoints);
 
-        // Set progress to active checkpoint position
         const activeId = settingsRes.data?.value;
         if (activeId) {
           const activeCp = checkpoints.find(c => c.id === activeId);
@@ -73,14 +68,12 @@ export default function RoadmapSection() {
 
   return (
     <section id="roadmap" className="roadmap-section" ref={containerRef}>
-      {/* Background Effects — gold/amber tint instead of cyan */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
         <div className="roadmap-scanlines" />
       </div>
 
-      {/* Animated Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -98,7 +91,6 @@ export default function RoadmapSection() {
       </motion.div>
 
       <div className="roadmap-canvas-container relative">
-        {/* Glass frame — padded so it's actually visible around the opaque 3D canvas, not hidden behind it */}
         <div
           className="absolute inset-0 rounded-3xl pointer-events-none"
           style={{
@@ -110,7 +102,6 @@ export default function RoadmapSection() {
           }}
         />
 
-        {/* Track Canvas — inset so the glass frame shows around its edges */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -128,21 +119,12 @@ export default function RoadmapSection() {
           </div>
         </motion.div>
 
-        {/* Dynamic Tooltip */}
         <AnimatePresence>
           {hoveredCheckpoint && (
             <Tooltip checkpoint={hoveredCheckpoint} visible={true} />
           )}
         </AnimatePresence>
 
-        {/* Progress HUD */}
-        <ProgressHUD
-          progress={progress}
-          activeCheckpoint={activeCheckpoint}
-          checkpoints={dbCheckpoints.length > 0 ? dbCheckpoints : CHECKPOINTS}
-        />
-
-        {/* Legend — gold hover instead of cyan */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}

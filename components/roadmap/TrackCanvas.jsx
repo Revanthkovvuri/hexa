@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useRef, useEffect } from 'react';
+import { Suspense, useRef, useEffect, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -10,12 +10,7 @@ import CarIndicator from './CarIndicator';
 import StartFinishFlag from './StartFinishFlag';
 import { CHECKPOINTS } from './trackData';
 
-/**
- * FitCameraToTrack — measures ONLY the tagged track group (not lights,
- * controls, or anything else in the scene) and positions the camera
- * so it fills the viewport regardless of the track's authored scale.
- */
-function FitCameraToTrack({ padding = 1.35, elevation = 0.65, debug = true }) {
+function FitCameraToTrack({ isMobile = false, padding = 1.35, elevation = 0.65, debug = true }) {
   const { camera, scene, invalidate } = useThree();
 
   useEffect(() => {
@@ -37,7 +32,8 @@ function FitCameraToTrack({ padding = 1.35, elevation = 0.65, debug = true }) {
       const maxDim = Math.max(size.x, size.z, size.y || 1);
 
       const fovRad = camera.fov * (Math.PI / 180);
-      const distance = (maxDim / 2 / Math.tan(fovRad / 2)) * padding;
+      const finalPadding = isMobile ? 1.1 : padding;
+      const distance = (maxDim / 2 / Math.tan(fovRad / 2)) * finalPadding;
 
       if (debug) {
         console.log('[FitCameraToTrack]', {
@@ -50,8 +46,6 @@ function FitCameraToTrack({ padding = 1.35, elevation = 0.65, debug = true }) {
         });
       }
 
-      // Sanity clamp — if something is still off, don't let the camera
-      // fly off to some absurd distance and render a speck.
       const safeDistance = THREE.MathUtils.clamp(distance, 2, 150);
 
       camera.position.set(center.x, safeDistance * elevation, center.z + safeDistance);
@@ -64,7 +58,7 @@ function FitCameraToTrack({ padding = 1.35, elevation = 0.65, debug = true }) {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [scene, camera, padding, elevation, invalidate, debug]);
+  }, [scene, camera, padding, elevation, invalidate, debug, isMobile]);
 
   return null;
 }
@@ -76,6 +70,15 @@ export default function TrackCanvas({
   onLeaveCheckpoint = () => {},
   onClickCheckpoint = () => {},
 }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <Canvas
       camera={{
@@ -96,9 +99,8 @@ export default function TrackCanvas({
         background: 'transparent',
       }}
     >
-      <FitCameraToTrack />
+      <FitCameraToTrack isMobile={isMobile} />
 
-      {/* Lighting — NOT inside trackRoot, so it's excluded from the fit */}
       <ambientLight intensity={0.3} />
       <directionalLight position={[10, 20, 5]} intensity={0.5} />
       <pointLight position={[0, 10, 0]} intensity={0.3} color="#5CE1E6" />
@@ -114,7 +116,6 @@ export default function TrackCanvas({
         makeDefault
       />
 
-      {/* Only what's inside this named group counts toward the camera fit */}
       <group name="trackRoot">
         <Suspense fallback={null}>
           <Track />

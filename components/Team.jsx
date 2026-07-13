@@ -169,7 +169,7 @@ function MemberCard({ member, isLead = false, sticky = false }) {
         <p className={`${nameSize} font-bold text-white leading-tight break-words`} title={member.name}>
           {member.name || 'TBA'}
         </p>
-        {isLead && member.role && (
+        {isLead || member.role && (
           <p className="text-[8px] font-medium mt-0.5 break-words text-[#D9B24C]/65" title={member.role}>
             {member.role}
           </p>
