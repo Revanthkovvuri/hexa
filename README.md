@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Hexawatts Racing Team — Website
 
-## Getting Started
+The official website for **JNTU Hexawatts Racing Team** — India's first electric vehicle team from both the Telugu states.
 
-First, run the development server:
+The Next.js app lives in the [`hexa-revanth/`](./hexa-revanth) subdirectory. The repository root holds Vercel / project config only.
+
+## Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Styling:** Tailwind CSS
+- **Database / Auth:** Supabase
+- **Animations:** Framer Motion
+- **3D viewer:** Three.js + @react-three/fiber + @react-three/drei
+
+## Local Development
 
 ```bash
+cd hexa-revanth
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dev server will start on [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Create a `.env.local` file inside `hexa-revanth/` with the following keys (get them from your Supabase project dashboard):
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
+```
 
-To learn more about Next.js, take a look at the following resources:
+These are required at build time because the Supabase client is initialised when the modules are first imported. Without them, data-fetching components will fail gracefully (returning `null`/empty arrays) but admin login will be unavailable.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment to Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Push the repository to GitHub (already done at `origin/main`).
+2. Import the project into Vercel.
+3. In **Project Settings → General → Root Directory**, set the value to `hexa-revanth`.
+4. In **Project Settings → Environment Variables**, add the two `NEXT_PUBLIC_SUPABASE_*` variables listed above for **Production**, **Preview**, and **Development** environments.
+5. Deploy. Vercel will run `npm install && next build` from the `hexa-revanth/` directory.
 
-## Deploy on Vercel
+The included `vercel.json` at the repo root mirrors these settings as a fallback, in case the Root Directory is not set explicitly.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Supabase Schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The app expects the following tables to exist in your Supabase project:
+
+- `hero_slides` — homepage carousel slides
+- `campaigns` — crowdfunding campaigns (with `goal_amount_paise`, `total_raised_paise`, `is_active`)
+- `donations` — donation records (`donor_email`, `campaign_id`, `status`)
+- `contact_submissions` — contact form submissions
+- `captains` — team captain / vice-captain
+- `domains` — team domain rows
+- `team_leads` — domain lead rows
+- `team_members` — domain member rows
+- `mentors` — mentor rows
+- `mechanical_specs` — mechanical car spec cards
+- `electrical_specs` — electrical car spec cards
+- `previous_sponsors` — sponsor logos for past seasons
+- `preliminary_sponsors` — current-season sponsor logos
+- `roadmap_checkpoints` — roadmap phases
+- `site_settings` — key/value site settings (e.g. active roadmap checkpoint)
+- `site_images` — image assets by `section` + `key`
+- `admin_allowed_emails` — emails allowed to sign in to `/admin`
+
+Storage buckets required: `team-photos`, `hero-slides`, `site-images`, `sponsor-logos`.

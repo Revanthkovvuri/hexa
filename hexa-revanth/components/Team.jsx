@@ -121,7 +121,7 @@ function CaptainCard({ captain }) {
 // ------------------------------------------------------------------
 // MEMBER CARD
 // ------------------------------------------------------------------
-function MemberCard({ member, isLead = false }) {
+function MemberCard({ member, isLead = false, sticky = false }) {
   const cardH    = isLead ? 'h-[165px] md:h-[235px]' : 'h-[150px] md:h-[210px]';
   const cardW    = isLead ? 'w-[115px] md:w-[165px]' : 'w-[105px] md:w-[148px]';
   const imgH     = isLead ? 'h-[110px] md:h-[160px]' : 'h-[100px] md:h-[142px]';
@@ -140,6 +140,7 @@ function MemberCard({ member, isLead = false }) {
         md:hover:border-[#D9B24C]/25
         cursor-default select-none touch-manipulation
         ${isLead ? 'ring-1 ring-[#D9B24C]/20 shadow-[0_4px_18px_rgba(0,0,0,0.5)]' : ''}
+        ${sticky ? 'shadow-[6px_0_16px_rgba(0,0,0,0.6)]' : ''}
       `}
     >
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent z-10 pointer-events-none" />
@@ -181,10 +182,22 @@ function MemberCard({ member, isLead = false }) {
 // ------------------------------------------------------------------
 // DOMAIN ROW
 // ------------------------------------------------------------------
-function DomainRow({ domain, index }) {
+// A domain row is rendered in one of two modes:
+//  - "compact": the domain only has a lead (no extra members). Two compact
+//    domains get placed side-by-side in a grid by the parent component.
+//  - "full": normal horizontally-scrolling row. When there are enough
+//    members to need scrolling, the lead card is pinned (sticky) to the
+//    left edge of the scroll container so it never gets scrolled out of
+//    view while browsing the rest of the team.
+const STICKY_THRESHOLD = 5; // lead + members count at/above which we pin the lead
+
+function DomainRow({ domain, compact = false }) {
   const scrollRef = useRef(null);
   const [canScrollLeft,  setCanScrollLeft]  = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const totalMembers = 1 + domain.members.length;
+  const isSticky = !compact && totalMembers >= STICKY_THRESHOLD;
 
   const updateArrows = () => {
     const el = scrollRef.current;
@@ -194,6 +207,7 @@ function DomainRow({ domain, index }) {
   };
 
   useEffect(() => {
+    if (compact) return; // no scrolling to track in compact mode
     const el = scrollRef.current;
     if (!el) return;
 
@@ -216,14 +230,37 @@ function DomainRow({ domain, index }) {
       el.removeEventListener('scroll', scheduleUpdate);
       window.removeEventListener('resize', scheduleUpdate);
     };
-  }, [domain.id]);
+  }, [domain.id, compact]);
 
   const scroll = (dir) => {
     scrollRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' });
   };
 
-  const totalMembers = 1 + domain.members.length;
+  // ---- COMPACT LAYOUT (single-member domains, paired two-per-row) ----
+  if (compact) {
+    return (
+      <div className="relative">
+        <div className="flex flex-col items-center mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full flex-shrink-0 bg-[#D9B24C]" />
+            <div className="flex items-center gap-2">
+              <span className="text-base leading-none">{domain.icon}</span>
+              <span className="text-xs font-black tracking-[0.18em] uppercase text-[#D9B24C]">{domain.name}</span>
+            </div>
+          </div>
+          <span className="text-[10px] text-white/25 font-bold tracking-widest uppercase mt-2">1 Member</span>
+        </div>
 
+        <div className="flex justify-center">
+          <MemberCard member={domain.lead} isLead={true} />
+        </div>
+
+        <div className="mt-6 h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+      </div>
+    );
+  }
+
+  // ---- FULL-WIDTH SCROLLING LAYOUT ----
   return (
     <div className="relative">
       <div className="flex flex-col items-center mb-4">
@@ -256,19 +293,32 @@ function DomainRow({ domain, index }) {
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4,2 8,6 4,10"/></svg>
           </button>
         </div>
+        {isSticky && (
+          <span className="text-[9px] text-white/15 font-medium mt-1 tracking-wide">Lead stays pinned while you scroll →</span>
+        )}
       </div>
 
       <div className="relative">
-        {canScrollLeft && <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none rounded-l-xl" />}
+        {canScrollLeft && (
+          <div
+            className="absolute top-0 bottom-0 w-12 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none rounded-l-xl"
+            style={{ left: isSticky ? '115px' : 0 }}
+          />
+        )}
         {canScrollRight && <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none rounded-r-xl" />}
 
         <div
           ref={scrollRef}
-          className="no-scrollbar flex justify-center gap-2.5 md:gap-3 overflow-x-auto pb-2"
+          className="no-scrollbar flex justify-start md:justify-center gap-2.5 md:gap-3 overflow-x-auto pb-2"
           style={{ scrollSnapType: 'x proximity', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <div style={{ scrollSnapAlign: 'start' }} className="flex-shrink-0">
-            <MemberCard member={domain.lead} isLead={true} />
+          {/* Lead card — pinned to the left edge of the scroll container when
+              the team is big enough that scrolling would otherwise hide it. */}
+          <div
+            style={{ scrollSnapAlign: 'start' }}
+            className={`flex-shrink-0 w-[115px] md:w-[165px] ${isSticky ? 'sticky left-0 z-20 bg-black' : ''}`}
+          >
+            <MemberCard member={domain.lead} isLead={true} sticky={isSticky} />
           </div>
 
           <div className="flex-shrink-0 self-stretch flex items-center">
@@ -311,7 +361,7 @@ export default function Team() {
         const [domainsRes, leadsRes, membersRes, mentorsRes, captainsRes] = await Promise.all([
           supabase.from('domains').select('*').order('display_order'),
           supabase.from('team_leads').select('*'),
-          supabase.from('members').select('*'),
+          supabase.from('team_members').select('*'),
           supabase.from('mentors').select('*').order('display_order'),
           supabase.from('captains').select('*').order('display_order'),
         ]);
@@ -345,7 +395,12 @@ export default function Team() {
           };
         });
 
-        setDomains(formatted.filter(d => d.members.length > 0 || d.lead.name !== 'TBA'));
+        // Alphabetical order by domain name, dropping empty/unpopulated domains.
+        const sorted = formatted
+          .filter(d => d.members.length > 0 || d.lead.name !== 'TBA')
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        setDomains(sorted);
       } catch (err) {
         console.error('Error fetching team data:', err);
       } finally {
@@ -354,6 +409,31 @@ export default function Team() {
     }
     fetchTeamData();
   }, []);
+
+  // Group consecutive single-member domains (lead only, no extra members)
+  // into pairs so they share one row instead of each wasting a full-width row.
+  const groupedRows = [];
+  {
+    let buffer = null;
+    domains.forEach(domain => {
+      const isSingle = domain.members.length === 0;
+      if (isSingle) {
+        if (buffer) {
+          groupedRows.push({ type: 'pair', domains: [buffer, domain] });
+          buffer = null;
+        } else {
+          buffer = domain;
+        }
+      } else {
+        if (buffer) {
+          groupedRows.push({ type: 'single', domain: buffer });
+          buffer = null;
+        }
+        groupedRows.push({ type: 'single', domain });
+      }
+    });
+    if (buffer) groupedRows.push({ type: 'single', domain: buffer });
+  }
 
   return (
     <section className="relative py-20 md:py-28 px-6 md:px-10 max-w-[1440px] mx-auto overflow-hidden" id="team">
@@ -457,9 +537,16 @@ export default function Team() {
       {/* Domain Rows */}
       {!loading && (
         <div className="relative z-10 flex flex-col gap-12">
-          {domains.map((domain, i) => (
-            <DomainRow key={domain.id} domain={domain} index={i} />
-          ))}
+          {groupedRows.map((row, i) =>
+            row.type === 'pair' ? (
+              <div key={`pair-${i}`} className="grid grid-cols-1 sm:grid-cols-2 gap-y-10 gap-x-6">
+                <DomainRow domain={row.domains[0]} compact />
+                <DomainRow domain={row.domains[1]} compact />
+              </div>
+            ) : (
+              <DomainRow key={row.domain.id} domain={row.domain} />
+            )
+          )}
           {domains.length === 0 && (
             <p className="text-white/20 text-sm font-medium tracking-wide">No team data available yet.</p>
           )}

@@ -347,3 +347,21 @@ body {
     transform: scale(1.4);
   }
 }
+
+/* Floating dots animation — used by Hero.jsx background dots */
+@keyframes dotFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: var(--opacity-min, 0.2);
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 0px), var(--drift-y, 0px), 0);
+    opacity: var(--opacity-max, 0.4);
+  }
+}
+
+/* Outline text utility — used by Specs.jsx (was using bogus `text-outline` Tailwind class) */
+.text-outline {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+  color: transparent;
+}

@@ -1,5 +1,5 @@
 import "./globals.css";
-import PantherAnimationWrapper from "@/components/PantherAnimationWrapper";
+import PantherAnimationWrapper from "@/components/Pantheranimationwrapper";
 
 export const metadata = {
   title: "HEXAWATTS RACING TEAM | ENGINEERED FOR SPEED",
