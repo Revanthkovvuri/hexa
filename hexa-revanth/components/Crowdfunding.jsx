@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import supabase from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
-
+const DONATE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeG8mEykVCpS4x4HbjOmtTQoKZ7KcoDe7lZd2JFSHyTuf931A/viewform?usp=preview"; // 👈 replace with your actual Google Form link
 const TOTAL_SEGMENTS = 30;
+
 
 export default function Crowdfunding() {
   const [stats, setStats] = useState({
@@ -268,13 +269,29 @@ export default function Crowdfunding() {
         {/* Contact Us */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="text-center">
           {!showContactForm ? (
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setShowContactForm(true)} className="group relative inline-flex items-center gap-2 sm:gap-3 bg-[#42AACC] text-black px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl uppercase tracking-wider overflow-hidden shadow-[0_8px_30px_rgba(0,200,224,0.3)] hover:shadow-[0_12px_40px_rgba(0,200,224,0.5)] transition-all duration-300 w-full sm:w-auto">
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              <span className="relative z-10 flex items-center gap-2 sm:gap-3">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                CONTACT US
-              </span>
-            </motion.button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setShowContactForm(true)} className="group relative inline-flex items-center gap-2 sm:gap-3 bg-[#42AACC] text-black px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl uppercase tracking-wider overflow-hidden shadow-[0_8px_30px_rgba(0,200,224,0.3)] hover:shadow-[0_12px_40px_rgba(0,200,224,0.5)] transition-all duration-300 w-full sm:w-auto">
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                  CONTACT US
+                </span>
+              </motion.button>
+
+              <motion.a
+                href={DONATE_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="group relative inline-flex items-center gap-2 sm:gap-3 bg-transparent border-2 border-[#42AACC] text-[#42AACC] px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl uppercase tracking-wider overflow-hidden shadow-[0_8px_30px_rgba(0,200,224,0.15)] hover:bg-[#42AACC]/10 hover:shadow-[0_12px_40px_rgba(0,200,224,0.3)] transition-all duration-300 w-full sm:w-auto"
+              >
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 8v2m9-6a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  DONATE NOW
+                </span>
+              </motion.a>
+            </div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-black border border-white/[0.08] rounded-2xl overflow-hidden max-w-4xl mx-auto shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="flex flex-col md:grid md:grid-cols-5">
