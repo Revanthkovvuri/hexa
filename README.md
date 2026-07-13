@@ -15,7 +15,7 @@ The Next.js app lives in the [`hexa-revanth/`](./hexa-revanth) subdirectory. The
 ## Local Development
 
 ```bash
-cd hexa-revanth
+cd hexawatts
 npm install
 npm run dev
 ```
