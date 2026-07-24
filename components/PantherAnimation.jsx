@@ -1,12 +1,18 @@
+<<<<<<< HEAD
 'use client';
 
 import { useEffect, useState } from 'react';
 import supabase from '@/lib/supabase';
+=======
+import Image from "next/image";
+
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
 
 export default function PantherAnimation({
   opacity = 0.75,
   glowColor = '#00DCC8',
 }) {
+<<<<<<< HEAD
   const [pantherUrl, setPantherUrl] = useState(null);
 
   useEffect(() => {
@@ -36,6 +42,13 @@ export default function PantherAnimation({
   }, []);
 
   if (!pantherUrl) return null;
+=======
+ 
+
+
+
+
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
 
   return (
     <div
@@ -52,11 +65,23 @@ export default function PantherAnimation({
         filter: `drop-shadow(0 0 30px ${glowColor}40)`,
       }}
     >
+<<<<<<< HEAD
       <img
         src={pantherUrl}
         alt="Hexawatts Panther"
         className="w-full h-full object-contain"
       />
+=======
+      <Image
+  src="/images/background2.webp"
+  alt="Hexawatts Panther"
+  fill
+  priority
+  sizes="(max-width: 768px) 95vw, (max-width: 1200px) 75vw, 65vw"
+  fetchPriority="high"
+  className="object-contain"
+/>
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
     </div>
   );
 }

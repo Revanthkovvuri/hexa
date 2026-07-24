@@ -279,17 +279,29 @@ export default function Crowdfunding() {
               </motion.button>
 
               <motion.a
+<<<<<<< HEAD
             
+=======
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
                 href={DONATE_FORM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
+<<<<<<< HEAD
                 className="group relative inline-flex items-center gap-2 sm:gap-3 bg-[#F2A93B] border-2 border-[#F2A93B] text-black px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl uppercase tracking-wider overflow-hidden shadow-[0_8px_30px_rgba(242,169,59,0.3)] hover:shadow-[0_12px_40px_rgba(242,169,59,0.5)] transition-all duration-300 w-full sm:w-auto"
               >
                 <span className="relative z-10 flex items-center gap-2 sm:gap-3">
                DONATE NOW
              </span>
+=======
+                className="group relative inline-flex items-center gap-2 sm:gap-3 bg-transparent border-2 border-[#42AACC] text-[#42AACC] px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl uppercase tracking-wider overflow-hidden shadow-[0_8px_30px_rgba(0,200,224,0.15)] hover:bg-[#42AACC]/10 hover:shadow-[0_12px_40px_rgba(0,200,224,0.3)] transition-all duration-300 w-full sm:w-auto"
+              >
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 8v2m9-6a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  DONATE NOW
+                </span>
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
               </motion.a>
             </div>
           ) : (
