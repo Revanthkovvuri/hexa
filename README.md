@@ -2,7 +2,11 @@
 
 The official website for **JNTU Hexawatts Racing Team** — India's first electric vehicle team from both the Telugu states.
 
+<<<<<<< HEAD
+The Next.js app lives in the [`hexa-revanth/`](./hexa-revanth) subdirectory. The repository root holds Vercel / project config only.
+=======
 The repository root holds Vercel / project config only.
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
 
 ## Stack
 
@@ -15,7 +19,11 @@ The repository root holds Vercel / project config only.
 ## Local Development
 
 ```bash
+<<<<<<< HEAD
+cd hexawatts
+=======
 cd hexa
+>>>>>>> 38363c7cebbf08db380e2e3a626a0d9c21eb0ab1
 npm install
 npm run dev
 ```
